@@ -250,7 +250,7 @@ export default function CreatorSignUp() {
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-sky-400 resize-none"
                   />
                   <label className="text-sm text-gray-700 mt-4 block">
-                    About Me (Required) – Share more about what you do and why you create content.
+                    About Me (Required) – Share more about what you do and why you create content.
                   </label>
                   <textarea
                     value={form.aboutMe}
@@ -292,12 +292,6 @@ export default function CreatorSignUp() {
                       onChange={(e) => updateSocial(k, "handle", e.target.value)}
                       placeholder="@yourhandle"
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 mb-2 focus:ring-2 focus:ring-sky-400"
-                    />
-                    <input
-                      value={form.socials[k].followers}
-                      onChange={(e) => updateSocial(k, "followers", e.target.value)}
-                      placeholder="Followers"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-400"
                     />
                   </div>
                 ))}
@@ -405,14 +399,6 @@ function PasswordField({ label, value, onChange, error, show, toggleShow }) {
           error ? "border-red-400" : "border-gray-300"
         }`}
       />
-      <button
-        type="button"
-        onClick={toggleShow}
-        className="absolute right-3 top-8 text-gray-500"
-      >
-        {show ? <FaEyeSlash /> : <FaEye />}
-      </button>
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>
   );
 }

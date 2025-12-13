@@ -1,5 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+// Components
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import About from "./components/About";
@@ -8,25 +10,26 @@ import HowItWorks from "./components/HowItWorks";
 import Influencers from "./components/Influencers";
 import BrandStories from "./components/BrandStories";
 import Footer from "./components/Footer";
+
+// Pages
 import CreatorSignUp from "./pages/creator-sign-up";
-// import CreatorProfile from "./pages/creator-profile";
-import CreatorWelcome from "./pages/creator-welcome-page";
+import CreatorWelcome from "./pages/creator-profile-page";
 import BrandSignup from "./pages/brand-sign-up";
+import BrandDashboard from "./pages/BrandDashboard";
+import Explore from "./pages/Explore";
+import CreatorProfile from "./pages/CreatorProfile";
 
 const App = () => {
   return (
     <Router>
       <div className="font-sans text-gray-800">
-        {/*  Navbar on all pages */}
-        <Navbar />
-
-        {/*  Define all routes */}
         <Routes>
           {/* Home Page */}
           <Route
             path="/"
             element={
               <>
+                <Navbar />
                 <Hero />
                 <About />
                 <Features />
@@ -38,17 +41,65 @@ const App = () => {
             }
           />
 
-          {/*  Influencer Signup */}
-          <Route path="/creator-sign-up" element={<CreatorSignUp />} />
+          {/* Explore Page */}
+          <Route
+            path="/explore"
+            element={
+              <>
+                <Navbar />
+                <Explore />
+                <Footer />
+              </>
+            }
+          />
 
-          {/*  Influencer Profile */}
-          {/* <Route path="/creator-profile" element={<CreatorProfile />} /> */}
+          {/* Creator Profile (Dynamic) */}
+          <Route
+            path="/creator/:id"
+            element={
+              <>
+                <Navbar />
+                <CreatorProfile />
+                <Footer />
+              </>
+            }
+          />
 
-          {/*  Welcome Page after signup */}
-          <Route path="/creator-welcome-page" element={<CreatorWelcome />} />
+          {/* Creator Signup */}
+          <Route
+            path="/creator-sign-up"
+            element={
+              <>
+                <Navbar />
+                <CreatorSignUp />
+              </>
+            }
+          />
 
-          {/*  Brand Signup */}
-          <Route path="/brand-sign-up" element={<BrandSignup />} />
+          {/* Creator Welcome Page */}
+          <Route
+            path="/creator-welcome-page"
+            element={
+              <>
+                <Navbar />
+                <CreatorWelcome />
+              </>
+            }
+          />
+
+          {/* Brand Signup */}
+          <Route
+            path="/brand-sign-up"
+            element={
+              <>
+                <Navbar />
+                <BrandSignup />
+              </>
+            }
+          />
+
+          {/* Brand Dashboard (No Navbar/Footer intentionally) */}
+          <Route path="/brand-dashboard" element={<BrandDashboard />} />
         </Routes>
       </div>
     </Router>
