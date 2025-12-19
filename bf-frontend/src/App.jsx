@@ -15,7 +15,7 @@ import Footer from "./components/Footer";
 import CreatorSignUp from "./pages/creator-sign-up";
 import CreatorWelcome from "./pages/creator-profile-page";
 import BrandSignup from "./pages/brand-sign-up";
-import BrandDashboard from "./pages/BrandDashboard";
+import BrandProfile from "./pages/brand-profile-page";
 import Explore from "./pages/Explore";
 import CreatorProfile from "./pages/CreatorProfile";
 
@@ -53,7 +53,7 @@ const App = () => {
             }
           />
 
-          {/* Creator Profile (Dynamic) */}
+          {/* Public Creator Profile (dynamic) */}
           <Route
             path="/creator/:id"
             element={
@@ -76,7 +76,18 @@ const App = () => {
             }
           />
 
-          {/* Creator Welcome Page */}
+          {/* Editable Creator Profile (post-signup destination) */}
+          <Route
+            path="/creator-profile"
+            element={
+              <>
+                <Navbar />
+                <CreatorWelcome />
+              </>
+            }
+          />
+
+          {/* Optional legacy alias (if anything still links here) */}
           <Route
             path="/creator-welcome-page"
             element={
@@ -98,8 +109,29 @@ const App = () => {
             }
           />
 
-          {/* Brand Dashboard (No Navbar/Footer intentionally) */}
-          <Route path="/brand-dashboard" element={<BrandDashboard />} />
+          {/* Brand Profile (post-signup destination) */}
+          <Route
+            path="/brand-profile"
+            element={
+              <>
+                <Navbar />
+                <BrandProfile />
+                <Footer />
+              </>
+            }
+          />
+
+          {/* Optional alias (if you ever used this old path)
+          <Route
+            path="/brand-profile-page"
+            element={
+              <>
+                <Navbar />
+                <BrandProfile />
+                <Footer />
+              </>
+            }
+          /> */}
         </Routes>
       </div>
     </Router>
