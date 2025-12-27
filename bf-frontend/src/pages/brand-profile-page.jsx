@@ -38,6 +38,9 @@ const INDUSTRIES = [
 ];
 
 const MAX_INDUSTRIES = 5;
+const MAX_LOGO_BYTES = 3 * 1024 * 1024; // 3MB
+
+const STORE_TYPES = ["Online", "Offline", "Both"];
 
 export default function BrandProfilePage() {
   const navigate = useNavigate();
@@ -61,15 +64,18 @@ export default function BrandProfilePage() {
       const data = JSON.parse(raw);
 
       const hydratedDraft = {
+        // account
         fullName: data?.fullName || "",
         workEmail: data?.workEmail || "",
 
+        // company
         companyName: data?.companyName || "",
         companyWebsite: data?.companyWebsite || "",
         aboutUs: data?.aboutUs || "",
         targetAudience: data?.targetAudience || "",
         categories: Array.isArray(data?.categories) ? data.categories : [],
 
+        // socials
         socials: {
           instagram: data?.socials?.instagram || "",
           facebook: data?.socials?.facebook || "",
@@ -77,7 +83,13 @@ export default function BrandProfilePage() {
           tiktok: data?.socials?.tiktok || "",
         },
 
+        // logo
         brandLogo: data?.brandLogo || "",
+
+        // NEW: store details (optional)
+        storeType: data?.storeType || "Online", // Online | Offline | Both
+        storeWebsite: data?.storeWebsite || "", // required if Online/Both
+        storeLocations: data?.storeLocations || "", // required if Offline/Both
       };
 
       setStored(data);
@@ -86,8 +98,6 @@ export default function BrandProfilePage() {
       navigate("/brand-sign-up");
     }
   }, [navigate]);
-
-  const selectedCount = draft?.categories?.length || 0;
 
   const socialsMeta = useMemo(
     () => [
@@ -127,7 +137,18 @@ export default function BrandProfilePage() {
     []
   );
 
-  if (!stored || !draft) return null;
+  if (!stored || !draft) {
+    // No blank screen: show a simple fallback
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+        <div className="w-full max-w-lg rounded-2xl bg-white border border-gray-200 p-6">
+          <p className="text-gray-800">Loading brand profile…</p>
+        </div>
+      </div>
+    );
+  }
+
+  const selectedCount = draft.categories?.length || 0;
 
   // ---------- validators ----------
   const websiteLooksValid = (value) => {
@@ -144,16 +165,34 @@ export default function BrandProfilePage() {
 
     if (!draft.companyName?.trim()) e.companyName = "Company name is required.";
 
-    if (!websiteLooksValid(draft.companyWebsite))
+    if (!websiteLooksValid(draft.companyWebsite)) {
       e.companyWebsite = "Enter a valid website (e.g., example.com).";
+    }
 
-    if ((draft.categories || []).length < 1)
+    if ((draft.categories || []).length < 1) {
       e.categories = "Select at least 1 industry/category.";
-    else if ((draft.categories || []).length > MAX_INDUSTRIES)
+    } else if ((draft.categories || []).length > MAX_INDUSTRIES) {
       e.categories = `Select max ${MAX_INDUSTRIES}.`;
+    }
 
-    if (!hasAtLeastOneSocial(draft.socials))
-      e.socials = "Please add at least 1 social media handle/link.";
+    if (!hasAtLeastOneSocial(draft.socials)) {
+      e.socials = "Please add at least 1 social handle/link.";
+    }
+
+    // Store validation (optional but conditional)
+    const storeType = String(draft.storeType || "Online");
+    if ((storeType === "Online" || storeType === "Both") && !draft.storeWebsite?.trim()) {
+      e.storeWebsite = "Store website is required for Online/Both.";
+    }
+    if (!websiteLooksValid(draft.storeWebsite)) {
+      // Only validate format if user typed something
+      if (String(draft.storeWebsite || "").trim()) {
+        e.storeWebsite = "Enter a valid store website (e.g., shop.example.com).";
+      }
+    }
+    if ((storeType === "Offline" || storeType === "Both") && !draft.storeLocations?.trim()) {
+      e.storeLocations = "Store locations are required for Offline/Both.";
+    }
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -171,10 +210,7 @@ export default function BrandProfilePage() {
   const toggleCategory = (cat) =>
     setDraft((d) => {
       const has = (d.categories || []).includes(cat);
-      const next = has
-        ? d.categories.filter((c) => c !== cat)
-        : [...(d.categories || []), cat];
-
+      const next = has ? d.categories.filter((c) => c !== cat) : [...(d.categories || []), cat];
       if (next.length > MAX_INDUSTRIES) return d;
       return { ...d, categories: next };
     });
@@ -186,7 +222,7 @@ export default function BrandProfilePage() {
     const next = {
       ...stored,
       fullName: draft.fullName,
-      workEmail: stored.workEmail || draft.workEmail,
+      workEmail: stored.workEmail || draft.workEmail, // keep original
       companyName: draft.companyName,
       companyWebsite: draft.companyWebsite,
       aboutUs: draft.aboutUs,
@@ -194,6 +230,11 @@ export default function BrandProfilePage() {
       categories: draft.categories,
       socials: { ...(stored.socials || {}), ...(draft.socials || {}) },
       brandLogo: draft.brandLogo,
+
+      // NEW store fields
+      storeType: draft.storeType,
+      storeWebsite: draft.storeWebsite,
+      storeLocations: draft.storeLocations,
     };
 
     try {
@@ -207,22 +248,27 @@ export default function BrandProfilePage() {
   };
 
   const cancel = () => {
+    const s = stored || {};
     setDraft({
-      fullName: stored?.fullName || "",
-      workEmail: stored?.workEmail || "",
-      companyName: stored?.companyName || "",
-      companyWebsite: stored?.companyWebsite || "",
-      aboutUs: stored?.aboutUs || "",
-      targetAudience: stored?.targetAudience || "",
-      categories: Array.isArray(stored?.categories) ? stored.categories : [],
+      fullName: s?.fullName || "",
+      workEmail: s?.workEmail || "",
+      companyName: s?.companyName || "",
+      companyWebsite: s?.companyWebsite || "",
+      aboutUs: s?.aboutUs || "",
+      targetAudience: s?.targetAudience || "",
+      categories: Array.isArray(s?.categories) ? s.categories : [],
       socials: {
-        instagram: stored?.socials?.instagram || "",
-        facebook: stored?.socials?.facebook || "",
-        youtube: stored?.socials?.youtube || "",
-        tiktok: stored?.socials?.tiktok || "",
+        instagram: s?.socials?.instagram || "",
+        facebook: s?.socials?.facebook || "",
+        youtube: s?.socials?.youtube || "",
+        tiktok: s?.socials?.tiktok || "",
       },
-      brandLogo: stored?.brandLogo || "",
+      brandLogo: s?.brandLogo || "",
+      storeType: s?.storeType || "Online",
+      storeWebsite: s?.storeWebsite || "",
+      storeLocations: s?.storeLocations || "",
     });
+
     setEditMode(false);
     setErrors({});
     setLogoError("");
@@ -241,16 +287,13 @@ export default function BrandProfilePage() {
       return;
     }
 
-    const maxBytes = 2.5 * 1024 * 1024;
-    if (file.size > maxBytes) {
-      setLogoError("Image is too large. Please upload under 2.5MB.");
+    if (file.size > MAX_LOGO_BYTES) {
+      setLogoError("Logo is too large. Please upload under 3MB.");
       return;
     }
 
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      setDraft((d) => ({ ...d, brandLogo: String(ev.target.result || "") }));
-    };
+    reader.onload = (ev) => setDraft((d) => ({ ...d, brandLogo: String(ev.target.result || "") }));
     reader.onerror = () => setLogoError("Could not read the file. Try again.");
     reader.readAsDataURL(file);
   };
@@ -261,134 +304,143 @@ export default function BrandProfilePage() {
     if (fileRef.current) fileRef.current.value = "";
   };
 
+  const storeType = String(draft.storeType || "Online");
+  const showStoreWebsite = storeType === "Online" || storeType === "Both";
+  const showStoreLocations = storeType === "Offline" || storeType === "Both";
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-50 pb-12">
-      <div className="relative h-44 sm:h-52 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900" />
-
-      <div className="max-w-6xl mx-auto px-4 -mt-14 sm:-mt-16 relative z-10">
-        {/* Header */}
-        <div className="rounded-3xl bg-white border border-gray-200 shadow-[0_18px_50px_-35px_rgba(0,0,0,0.35)] p-6 md:p-8">
-          <div className="flex flex-col md:flex-row md:items-center gap-6">
-            <div className="flex items-center gap-5 min-w-0">
-              <div className="relative">
-                <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm flex items-center justify-center">
-                  {draft.brandLogo ? (
-                    <img
-                      src={draft.brandLogo}
-                      alt="Brand logo"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-center px-3">
-                      <div className="mx-auto w-10 h-10 rounded-xl bg-gray-900 text-white flex items-center justify-center">
-                        <FaBuilding />
-                      </div>
-                      <p className="mt-2 text-xs text-gray-500">Upload logo</p>
-                    </div>
-                  )}
-                </div>
-
-                {editMode ? (
-                  <button
-                    type="button"
-                    onClick={pickLogo}
-                    className="absolute -bottom-2 -right-2 w-10 h-10 rounded-xl bg-gray-900 text-white flex items-center justify-center shadow-md hover:bg-black transition"
-                    title="Upload / Change logo"
-                  >
-                    <FaCamera />
-                  </button>
-                ) : null}
-
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleLogo}
-                />
+    <div className="min-h-screen bg-gray-100 py-10 px-4">
+      {/* ONE simple box / card */}
+      <div className="mx-auto w-full max-w-4xl rounded-3xl bg-white border border-gray-200 shadow-sm p-6 md:p-8">
+        {/* Top header inside same card */}
+        <div className="flex flex-col md:flex-row md:items-center gap-6">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="relative">
+              <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
+                {draft.brandLogo ? (
+                  <img
+                    src={draft.brandLogo}
+                    alt="Brand logo"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-xl bg-gray-900 text-white flex items-center justify-center">
+                    <FaBuilding />
+                  </div>
+                )}
               </div>
 
-              <div className="min-w-0">
-                <h1 className="text-2xl md:text-3xl font-medium text-gray-900 truncate">
-                  {stored.companyName || "Brand Profile"}
-                </h1>
-                <p className="text-base text-gray-600 truncate">
-                  {stored.workEmail || "—"}
-                </p>
-                {logoError ? (
-                  <p className="mt-2 text-sm text-red-600">{logoError}</p>
-                ) : null}
-              </div>
-            </div>
-
-            <div className="md:ml-auto flex flex-wrap gap-3">
-              {!editMode ? (
+              {editMode ? (
                 <button
                   type="button"
-                  onClick={() => setEditMode(true)}
-                  className="px-6 py-3 rounded-2xl bg-gray-900 text-white hover:bg-black transition shadow-sm text-base"
+                  onClick={pickLogo}
+                  className="absolute -bottom-2 -right-2 w-9 h-9 rounded-xl bg-gray-900 text-white flex items-center justify-center shadow hover:bg-black transition"
+                  title="Upload / Change logo"
                 >
-                  Edit Profile
+                  <FaCamera />
                 </button>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={save}
-                    className="px-6 py-3 rounded-2xl bg-emerald-600 text-white hover:bg-emerald-700 transition shadow-sm text-base"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={cancel}
-                    className="px-6 py-3 rounded-2xl bg-gray-100 text-gray-900 hover:bg-gray-200 transition text-base"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={removeLogo}
-                    className="px-6 py-3 rounded-2xl bg-gray-100 text-gray-900 hover:bg-gray-200 transition inline-flex items-center gap-2 text-base"
-                    title="Remove logo"
-                  >
-                    <FaTrash />
-                    Remove logo
-                  </button>
-                </>
-              )}
+              ) : null}
+
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleLogo}
+              />
+            </div>
+
+            <div className="min-w-0">
+              <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 truncate">
+                {stored.companyName || "Brand Profile"}
+              </h1>
+              <p className="text-gray-600 truncate">{stored.workEmail || "—"}</p>
+
+              {logoError ? (
+                <p className="mt-2 text-sm text-red-600">{logoError}</p>
+              ) : null}
             </div>
           </div>
 
-          {editMode ? (
-            <div className="mt-7 grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="md:ml-auto flex flex-wrap gap-2">
+            {!editMode ? (
+              <button
+                type="button"
+                onClick={() => setEditMode(true)}
+                className="px-5 py-2.5 rounded-xl bg-gray-900 text-white hover:bg-black transition"
+              >
+                Edit Profile
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={save}
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  onClick={cancel}
+                  className="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-900 hover:bg-gray-200 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={removeLogo}
+                  className="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-900 hover:bg-gray-200 transition inline-flex items-center gap-2"
+                >
+                  <FaTrash />
+                  Remove logo
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="my-6 border-t border-gray-200" />
+
+        {/* Everything else inside the SAME card */}
+        <div className="space-y-8">
+          {/* Account */}
+          <div>
+            <SectionTitle>Account</SectionTitle>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
               <Input
                 label="Account Owner Name"
                 value={draft.fullName}
                 onChange={(e) => setField("fullName", e.target.value)}
+                disabled={!editMode}
+                leftIcon={<FaUserAlt />}
               />
-              <Input label="Work Email (read only)" value={draft.workEmail} readOnly />
+              <Input
+                label="Work Email"
+                value={draft.workEmail}
+                readOnly
+                disabled
+                leftIcon={<FaEnvelope />}
+              />
             </div>
-          ) : null}
-        </div>
+          </div>
 
-        {/* CONTENT */}
-        <div className="mt-6 grid grid-cols-1 gap-6">
-          {/* Company Details wide */}
-          <SectionCard title="Company Details" subtitle="Update your brand information.">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Company */}
+          <div>
+            <SectionTitle>Company Details</SectionTitle>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
               <Input
                 label="Company Name"
-                value={editMode ? draft.companyName : stored.companyName}
+                value={draft.companyName}
                 onChange={(e) => setField("companyName", e.target.value)}
                 disabled={!editMode}
                 error={errors.companyName}
               />
 
-              {/* Website: icon INSIDE field, clickable to open website */}
               <WebsiteField
-                label="Website (Optional)"
-                value={editMode ? draft.companyWebsite : stored.companyWebsite}
+                label="Company Website (Optional)"
+                value={draft.companyWebsite}
                 onChange={(e) => setField("companyWebsite", e.target.value)}
                 disabled={!editMode}
                 error={errors.companyWebsite}
@@ -396,139 +448,162 @@ export default function BrandProfilePage() {
               />
             </div>
 
-            {/* About Us: heading + text field, then Target Audience below it */}
-            <div className="mt-7">
-              <TextSectionTitle>About Us</TextSectionTitle>
-
+            <div className="mt-4">
+              <label className="text-sm text-gray-700">About Us (Optional)</label>
               {editMode ? (
-                <Textarea
+                <AutoTextarea
                   value={draft.aboutUs}
                   onChange={(e) => setField("aboutUs", e.target.value)}
                   placeholder="Write about your brand..."
-                  autoResize
                 />
               ) : (
-                <ReadArea>
-                  <ExpandableText text={stored.aboutUs} emptyText="Not provided" lines={20} />
-                </ReadArea>
+                <ReadBox text={stored.aboutUs} />
               )}
             </div>
 
-            <div className="mt-7">
-              <TextSectionTitle>Target Audience</TextSectionTitle>
-
+            <div className="mt-4">
+              <label className="text-sm text-gray-700">Target Audience (Optional)</label>
               {editMode ? (
-                <Textarea
+                <AutoTextarea
                   value={draft.targetAudience}
                   onChange={(e) => setField("targetAudience", e.target.value)}
                   placeholder="Describe your target audience..."
-                  autoResize
                 />
               ) : (
-                <ReadArea>
-                  <ExpandableText
-                    text={stored.targetAudience}
-                    emptyText="Not provided"
-                    lines={20}
-                  />
-                </ReadArea>
+                <ReadBox text={stored.targetAudience} />
               )}
             </div>
-          </SectionCard>
+          </div>
 
-          {/* Social Media Accounts */}
-          <SectionCard
-            title="Social Media Accounts"
-            subtitle="Add a handle or link. Click the icon to open your profile."
-          >
-            {errors.socials ? (
-              <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
-                <p className="text-base text-red-700">{errors.socials}</p>
+          {/* NEW: Store */}
+          <div>
+            <SectionTitle>Store</SectionTitle>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+              <Select
+                label="Store Type"
+                value={draft.storeType}
+                onChange={(e) => setField("storeType", e.target.value)}
+                disabled={!editMode}
+                options={STORE_TYPES}
+              />
+
+              {showStoreWebsite ? (
+                <WebsiteField
+                  label="Store Website"
+                  value={draft.storeWebsite}
+                  onChange={(e) => setField("storeWebsite", e.target.value)}
+                  disabled={!editMode}
+                  error={errors.storeWebsite}
+                  placeholder="shop.example.com"
+                />
+              ) : (
+                <div />
+              )}
+            </div>
+
+            {showStoreLocations ? (
+              <div className="mt-4">
+                <label className="text-sm text-gray-700">Store Locations</label>
+                {editMode ? (
+                  <AutoTextarea
+                    value={draft.storeLocations}
+                    onChange={(e) => setField("storeLocations", e.target.value)}
+                    placeholder="Add locations (one per line). Example:
+Lahore – MM Alam Road
+Karachi – Dolmen Mall"
+                    error={errors.storeLocations}
+                  />
+                ) : (
+                  <ReadBox text={stored.storeLocations} emptyText="Not provided" />
+                )}
+                {errors.storeLocations ? (
+                  <p className="mt-1 text-sm text-red-600">{errors.storeLocations}</p>
+                ) : null}
               </div>
             ) : null}
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Industry */}
+          <div>
+            <SectionTitle>Industry / Categories</SectionTitle>
+            {errors.categories ? (
+              <p className="mt-2 text-sm text-red-600">{errors.categories}</p>
+            ) : null}
+
+            <div className="mt-3 flex items-center justify-between">
+              <p className="text-sm text-gray-600">
+                {editMode ? "Select 1 to 5" : "Selected"}
+              </p>
+              <span className="text-xs text-gray-600">
+                {selectedCount}/{MAX_INDUSTRIES}
+              </span>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2">
+              {INDUSTRIES.map((cat) => {
+                const selected = (draft.categories || []).includes(cat);
+                const disabled = editMode && !selected && selectedCount >= MAX_INDUSTRIES;
+
+                if (!editMode) {
+                  if (!selected) return null;
+                  return (
+                    <span
+                      key={cat}
+                      className="px-3 py-1.5 rounded-full text-xs border border-gray-200 bg-gray-100 text-gray-800"
+                    >
+                      {cat}
+                    </span>
+                  );
+                }
+
+                return (
+                  <button
+                    key={cat}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => toggleCategory(cat)}
+                    className={[
+                      "px-3 py-1.5 rounded-full text-xs border transition",
+                      selected
+                        ? "border-gray-900 bg-gray-900 text-white"
+                        : "border-gray-200 bg-white text-gray-800 hover:bg-gray-50",
+                      disabled ? "opacity-40 cursor-not-allowed" : "",
+                    ].join(" ")}
+                  >
+                    {cat}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Socials */}
+          <div>
+            <SectionTitle>Social Media Accounts</SectionTitle>
+            {errors.socials ? (
+              <p className="mt-2 text-sm text-red-600">{errors.socials}</p>
+            ) : (
+              <p className="mt-2 text-xs text-gray-500">
+                At least 1 social handle/link is required.
+              </p>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
               {socialsMeta.map(({ key, label, Icon, iconColor, placeholder, hrefBuilder }) => (
-                <SocialRow
+                <SocialField
                   key={key}
                   label={label}
                   Icon={Icon}
                   iconColor={iconColor}
-                  value={editMode ? draft.socials?.[key] : stored.socials?.[key]}
-                  onChange={(v) => updateSocial(key, v)}
+                  value={draft.socials?.[key] || ""}
                   disabled={!editMode}
                   placeholder={placeholder}
                   hrefBuilder={hrefBuilder}
+                  onChange={(v) => updateSocial(key, v)}
                 />
               ))}
             </div>
-
-            <p className="mt-5 text-sm text-gray-600">
-              Note: At least 1 social handle/link is required to save.
-            </p>
-          </SectionCard>
-
-          {/* Industry + Account */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <SectionCard title="Industry/Categories" subtitle="Choose 1 to 5 categories.">
-              {errors.categories ? (
-                <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 px-5 py-4">
-                  <p className="text-base text-red-700">{errors.categories}</p>
-                </div>
-              ) : null}
-
-              <div className="flex items-center justify-between">
-                <p className="text-base text-gray-700">
-                  {editMode ? "Choose (1–5)" : "Selected"}
-                </p>
-                <span className="text-sm text-gray-600">
-                  {selectedCount}/{MAX_INDUSTRIES}
-                </span>
-              </div>
-
-              <div className="mt-5 flex flex-wrap gap-3">
-                {INDUSTRIES.map((cat) => {
-                  const selected = (draft.categories || []).includes(cat);
-                  const disabled =
-                    editMode && !selected && selectedCount >= MAX_INDUSTRIES;
-
-                  if (!editMode) {
-                    if (!selected) return null;
-                    return (
-                      <span
-                        key={cat}
-                        className="px-4 py-2 rounded-full text-sm border border-gray-200 bg-gray-100 text-gray-900"
-                      >
-                        {cat}
-                      </span>
-                    );
-                  }
-
-                  return (
-                    <button
-                      key={cat}
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => toggleCategory(cat)}
-                      className={[
-                        "px-4 py-2 rounded-full text-sm border transition",
-                        selected
-                          ? "border-gray-900 bg-gray-900 text-white"
-                          : "border-gray-200 bg-white text-gray-900 hover:bg-gray-100",
-                        disabled ? "opacity-40 cursor-not-allowed" : "",
-                      ].join(" ")}
-                    >
-                      {cat}
-                    </button>
-                  );
-                })}
-              </div>
-            </SectionCard>
-
-            <SectionCard title="Account" subtitle="Basic account information.">
-              <InfoRow icon={<FaUserAlt />} label="Owner Name" value={stored.fullName || "—"} />
-              <InfoRow icon={<FaEnvelope />} label="Work Email" value={stored.workEmail || "—"} />
-            </SectionCard>
           </div>
         </div>
       </div>
@@ -536,75 +611,75 @@ export default function BrandProfilePage() {
   );
 }
 
-/* ---------------- UI Components ---------------- */
+/* ---------------- Small UI components ---------------- */
 
-function SectionCard({ title, subtitle, children }) {
-  return (
-    <div className="rounded-3xl border border-gray-200 bg-white shadow-sm p-7 md:p-8">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl md:text-3xl font-medium text-gray-900">{title}</h2>
-        {subtitle ? <p className="text-base text-gray-600">{subtitle}</p> : null}
-      </div>
-      <div className="mt-6">{children}</div>
-    </div>
-  );
+function SectionTitle({ children }) {
+  return <h2 className="text-lg md:text-xl font-semibold text-gray-900">{children}</h2>;
 }
 
-function TextSectionTitle({ children }) {
-  return (
-    <h3 className="text-lg md:text-xl font-medium text-gray-900">
-      {children}
-    </h3>
-  );
-}
-
-function Input({ label, error, disabled, className = "", ...props }) {
+function Input({ label, error, disabled, leftIcon, className = "", ...props }) {
   return (
     <div className={className}>
-      <label className="text-base text-gray-800">{label}</label>
-
+      <label className="text-sm text-gray-700">{label}</label>
       <div
         className={[
-          "mt-2 rounded-2xl border transition",
-          disabled ? "bg-gray-100 border-gray-200" : "bg-gray-50 border-gray-300",
-          error ? "border-red-300" : "",
-          !disabled ? "focus-within:ring-2 focus-within:ring-gray-200" : "",
+          "mt-2 flex items-center gap-2 rounded-2xl border px-4 py-3 bg-gray-50 transition",
+          disabled ? "opacity-90" : "focus-within:ring-2 focus-within:ring-gray-200",
+          error ? "border-red-300" : "border-gray-200",
         ].join(" ")}
       >
+        {leftIcon ? <span className="text-gray-400">{leftIcon}</span> : null}
         <input
           {...props}
           disabled={disabled}
-          className={[
-            "w-full bg-transparent px-5 py-3 text-base outline-none",
-            disabled ? "cursor-not-allowed text-gray-600" : "text-gray-900",
-          ].join(" ")}
+          className="w-full bg-transparent outline-none text-sm text-gray-900"
         />
       </div>
-
-      {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="mt-1 text-sm text-red-600">{error}</p> : null}
     </div>
   );
 }
 
-/**
- * Website field:
- * - Icon is INSIDE the field (right side).
- * - Clicking icon opens the website (if value is valid/non-empty).
- */
+function Select({ label, value, onChange, disabled, options }) {
+  return (
+    <div>
+      <label className="text-sm text-gray-700">{label}</label>
+      <div
+        className={[
+          "mt-2 rounded-2xl border px-4 py-3 bg-gray-50 transition",
+          disabled ? "opacity-90" : "focus-within:ring-2 focus-within:ring-gray-200",
+          "border-gray-200",
+        ].join(" ")}
+      >
+        <select
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          className="w-full bg-transparent outline-none text-sm text-gray-900"
+        >
+          {options.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
+
 function WebsiteField({ label, value, onChange, disabled, error, placeholder }) {
   const raw = String(value || "").trim();
   const href = raw ? normalizeUrl(raw) : "";
 
   return (
     <div>
-      <label className="text-base text-gray-800">{label}</label>
-
+      <label className="text-sm text-gray-700">{label}</label>
       <div
         className={[
-          "mt-2 flex items-center rounded-2xl border transition",
-          disabled ? "bg-gray-100 border-gray-200" : "bg-gray-50 border-gray-300",
-          error ? "border-red-300" : "",
-          !disabled ? "focus-within:ring-2 focus-within:ring-gray-200" : "",
+          "mt-2 flex items-center rounded-2xl border bg-gray-50 px-4 py-3 transition",
+          disabled ? "opacity-90" : "focus-within:ring-2 focus-within:ring-gray-200",
+          error ? "border-red-300" : "border-gray-200",
         ].join(" ")}
       >
         <input
@@ -612,214 +687,123 @@ function WebsiteField({ label, value, onChange, disabled, error, placeholder }) 
           onChange={onChange}
           disabled={disabled}
           placeholder={placeholder}
-          className={[
-            "w-full bg-transparent px-5 py-3 text-base outline-none",
-            disabled ? "cursor-not-allowed text-gray-600" : "text-gray-900",
-          ].join(" ")}
+          className="w-full bg-transparent outline-none text-sm text-gray-900"
         />
 
-        <div className="pr-3">
+        <div className="ml-2">
           {href ? (
             <a
               href={href}
               target="_blank"
               rel="noreferrer"
               title="Open website"
-              className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-800 hover:bg-gray-50 transition"
+              className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-800 hover:bg-gray-50 transition"
             >
               <FaGlobe />
             </a>
           ) : (
-            <div
-              className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-300"
-              title="Add a website to enable"
-            >
+            <div className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-300">
               <FaGlobe />
             </div>
           )}
         </div>
       </div>
 
-      {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
+      {error ? <p className="mt-1 text-sm text-red-600">{error}</p> : null}
     </div>
   );
 }
 
-function Textarea({ error, disabled, autoResize = false, className = "", ...props }) {
+function AutoTextarea({ value, onChange, placeholder, error }) {
   const ref = useRef(null);
 
   useEffect(() => {
-    if (!autoResize) return;
     if (!ref.current) return;
     ref.current.style.height = "auto";
     ref.current.style.height = `${ref.current.scrollHeight}px`;
-  }, [autoResize, props.value]);
-
-  const onInput = (e) => {
-    if (autoResize) {
-      e.currentTarget.style.height = "auto";
-      e.currentTarget.style.height = `${e.currentTarget.scrollHeight}px`;
-    }
-    props.onInput?.(e);
-  };
+  }, [value]);
 
   return (
-    <div className={className}>
+    <>
       <div
         className={[
-          "mt-3 rounded-2xl border transition",
-          disabled ? "bg-gray-100 border-gray-200" : "bg-gray-50 border-gray-300",
-          error ? "border-red-300" : "",
-          !disabled ? "focus-within:ring-2 focus-within:ring-gray-200" : "",
+          "mt-2 rounded-2xl border bg-gray-50 px-4 py-3 transition focus-within:ring-2 focus-within:ring-gray-200",
+          error ? "border-red-300" : "border-gray-200",
         ].join(" ")}
       >
         <textarea
-          {...props}
           ref={ref}
-          disabled={disabled}
-          rows={autoResize ? 1 : 6}
-          onInput={onInput}
-          className={[
-            "w-full bg-transparent px-5 py-3 text-base outline-none resize-none overflow-hidden",
-            disabled ? "cursor-not-allowed text-gray-600" : "text-gray-900",
-          ].join(" ")}
+          value={value || ""}
+          onChange={onChange}
+          placeholder={placeholder}
+          rows={1}
+          className="w-full bg-transparent outline-none text-sm text-gray-900 resize-none overflow-hidden"
         />
       </div>
-
-      {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
-    </div>
+      {error ? <p className="mt-1 text-sm text-red-600">{error}</p> : null}
+    </>
   );
 }
 
-function ReadArea({ children }) {
+function ReadBox({ text, emptyText = "Not provided" }) {
+  const t = String(text || "").trim();
   return (
-    <div className="mt-3 rounded-2xl border border-gray-200 bg-gray-50 px-5 py-4">
-      {children}
-    </div>
-  );
-}
-
-/** Truncate after N lines and show Read More when needed */
-function ExpandableText({ text, emptyText = "—", lines = 20 }) {
-  const [expanded, setExpanded] = useState(false);
-  const [canExpand, setCanExpand] = useState(false);
-  const ref = useRef(null);
-
-  const value = String(text || "").trim();
-  const display = value ? value : emptyText;
-
-  const clampStyle = useMemo(
-    () => ({
-      display: "-webkit-box",
-      WebkitLineClamp: lines,
-      WebkitBoxOrient: "vertical",
-      overflow: "hidden",
-    }),
-    [lines]
-  );
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const id = requestAnimationFrame(() => {
-      const el = ref.current;
-      if (!el) return;
-
-      if (expanded) {
-        setCanExpand(true);
-        return;
-      }
-      const overflowing = el.scrollHeight > el.clientHeight + 1;
-      setCanExpand(overflowing);
-    });
-
-    return () => cancelAnimationFrame(id);
-  }, [display, expanded, lines]);
-
-  return (
-    <div>
-      <p
-        ref={ref}
-        className="text-base text-gray-900 whitespace-pre-wrap leading-relaxed"
-        style={!expanded ? clampStyle : undefined}
-      >
-        {display}
+    <div className="mt-2 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+      <p className="text-sm text-gray-900 whitespace-pre-wrap leading-relaxed">
+        {t ? t : emptyText}
       </p>
-
-      {value && canExpand ? (
-        <button
-          type="button"
-          onClick={() => setExpanded((s) => !s)}
-          className="mt-3 text-base text-gray-700 underline underline-offset-4 hover:text-gray-900 transition"
-        >
-          {expanded ? "Read Less" : "Read More"}
-        </button>
-      ) : null}
     </div>
   );
 }
 
-/** Social row: platform icon becomes clickable if value exists */
-function SocialRow({ label, Icon, iconColor, value, onChange, disabled, placeholder, hrefBuilder }) {
+function SocialField({
+  label,
+  Icon,
+  iconColor,
+  value,
+  onChange,
+  disabled,
+  placeholder,
+  hrefBuilder,
+}) {
   const raw = String(value || "").trim();
   const href = raw ? hrefBuilder?.(raw) : "";
   const canOpen = Boolean(href);
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5">
-      <div className="flex items-center gap-3">
+    <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
+      <div className="flex items-center gap-2">
         {canOpen ? (
           <a href={href} target="_blank" rel="noreferrer" title={`Open ${label}`}>
-            <Icon className={`text-2xl ${iconColor}`} />
+            <Icon className={`text-lg ${iconColor}`} />
           </a>
         ) : (
-          <Icon className={`text-2xl ${iconColor} opacity-80`} />
+          <Icon className={`text-lg ${iconColor} opacity-80`} />
         )}
-
-        <div className="min-w-0">
-          <p className="text-base text-gray-900">{label}</p>
-          {canOpen ? (
-            <a
-              href={href}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm text-gray-600 underline underline-offset-4"
-            >
-              Open profile
-            </a>
-          ) : (
-            <p className="text-sm text-gray-500">Add handle or link</p>
-          )}
-        </div>
+        <p className="text-sm text-gray-900">{label}</p>
+        {canOpen ? (
+          <a
+            href={href}
+            target="_blank"
+            rel="noreferrer"
+            className="ml-auto text-xs text-gray-600 underline underline-offset-2"
+          >
+            Open
+          </a>
+        ) : null}
       </div>
 
-      {!disabled ? (
-        <div className="mt-4 rounded-2xl border border-gray-300 bg-gray-50 focus-within:ring-2 focus-within:ring-gray-200 transition">
+      <div className="mt-2">
+        {disabled ? (
+          <p className="text-sm text-gray-700 break-words">{raw || "Not added"}</p>
+        ) : (
           <input
             value={value || ""}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            className="w-full bg-transparent px-5 py-3 text-base outline-none"
+            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-gray-200"
           />
-        </div>
-      ) : (
-        <p className="mt-4 text-base text-gray-800 break-words">
-          {raw ? raw : "Not added"}
-        </p>
-      )}
-    </div>
-  );
-}
-
-function InfoRow({ icon, label, value }) {
-  return (
-    <div className="flex items-start gap-4 py-4 border-b border-gray-100 last:border-b-0">
-      <div className="w-10 h-10 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-700">
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm text-gray-600">{label}</p>
-        <p className="text-base text-gray-900 break-words">{value}</p>
+        )}
       </div>
     </div>
   );
@@ -844,6 +828,7 @@ function toUrlOrKeep(input, handleToUrl) {
 
   if (/^https?:\/\//i.test(v)) return v;
 
+  // domain/path without scheme
   if (v.startsWith("www.") || v.includes(".") || v.includes("/")) {
     return normalizeUrl(v);
   }
