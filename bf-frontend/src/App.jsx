@@ -14,18 +14,28 @@ import Footer from "./components/Footer";
 // Pages
 import CreatorSignUp from "./pages/creator-sign-up";
 import CreatorWelcome from "./pages/creator-profile-page";
+import CreatorDashboard from "./pages/CreatorDashboard";
+
 import BrandSignup from "./pages/brand-sign-up";
 import BrandProfile from "./pages/brand-profile-page";
 import BrandDashboard from "./pages/BrandDashboard";
+
 import Explore from "./pages/Explore";
 import CreatorProfile from "./pages/CreatorProfile";
 
-// Brand Dashboard nested pages (inside pages/BrandMaterial/components)
-import DashboardHome from "./pages/BrandMaterial/components/DashBoardHome";
+// Brand Dashboard nested pages
+import DashboardHome from "./pages/BrandMaterial/components/DashboardHome";
 import Campaigns from "./pages/BrandMaterial/components/Campaigns";
 import Messages from "./pages/BrandMaterial/components/Messages";
 import Meetings from "./pages/BrandMaterial/components/Meetings";
 import Payments from "./pages/BrandMaterial/components/Payments";
+
+// Creator Dashboard nested pages
+import CreatorDashboardHome from "./pages/CreatorMaterial/components/CreatorDashboardHome";
+import CreatorOpportunities from "./pages/CreatorMaterial/components/CreatorOpportunities";
+import CreatorMessages from "./pages/CreatorMaterial/components/CreatorMessages";
+import CreatorMeetings from "./pages/CreatorMaterial/components/CreatorMeetings";
+import CreatorEarnings from "./pages/CreatorMaterial/components/CreatorEarnings";
 
 const App = () => {
   return (
@@ -95,6 +105,15 @@ const App = () => {
               </>
             }
           />
+
+          {/* Creator Dashboard (nested routes) */}
+          <Route path="/creator-dashboard" element={<CreatorDashboard />}>
+            <Route index element={<CreatorDashboardHome />} />
+            <Route path="opportunities" element={<CreatorOpportunities />} />
+            <Route path="messages" element={<CreatorMessages />} />
+            <Route path="meetings" element={<CreatorMeetings />} />
+            <Route path="earnings" element={<CreatorEarnings />} />
+          </Route>
 
           {/* Optional legacy alias */}
           <Route
