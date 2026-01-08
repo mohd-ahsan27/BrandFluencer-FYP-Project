@@ -1,6 +1,10 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
+// Login modal system (used by Navbar Login + Sign Up buttons)
+import { LoginModalProvider } from "./context/LoginModalContext";
+import LoginChooserModal from "./components/LoginChooserModal";
+
 // Components
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -15,10 +19,12 @@ import Footer from "./components/Footer";
 import CreatorSignUp from "./pages/creator-sign-up";
 import CreatorWelcome from "./pages/creator-profile-page";
 import CreatorDashboard from "./pages/CreatorDashboard";
+import CreatorLogin from "./pages/creator-login";
 
 import BrandSignup from "./pages/brand-sign-up";
 import BrandProfile from "./pages/brand-profile-page";
 import BrandDashboard from "./pages/BrandDashboard";
+import BrandLogin from "./pages/brand-login";
 
 import Explore from "./pages/Explore";
 import CreatorProfile from "./pages/CreatorProfile";
@@ -31,145 +37,178 @@ import Meetings from "./pages/BrandMaterial/components/Meetings";
 import Payments from "./pages/BrandMaterial/components/Payments";
 
 // Creator Dashboard nested pages
+
 import CreatorDashboardHome from "./pages/CreatorMaterial/components/CreatorDashboardHome";
 import CreatorOpportunities from "./pages/CreatorMaterial/components/CreatorOpportunities";
 import CreatorMessages from "./pages/CreatorMaterial/components/CreatorMessages";
 import CreatorMeetings from "./pages/CreatorMaterial/components/CreatorMeetings";
 import CreatorEarnings from "./pages/CreatorMaterial/components/CreatorEarnings";
 
+
 const App = () => {
   return (
-    <Router>
-      <div className="font-sans text-gray-800">
-        <Routes>
-          {/* Home Page */}
-          <Route
-            path="/"
-            element={
-              <>
-                <Navbar />
-                <Hero />
-                <About />
-                <Features />
-                <HowItWorks />
-                <Influencers />
-                <BrandStories />
-                <Footer />
-              </>
-            }
-          />
+    <LoginModalProvider>
+      <Router>
+        {/* Global modal so Navbar Login/SignUp works everywhere */}
+        <LoginChooserModal />
 
-          {/* Explore Page */}
-          <Route
-            path="/explore"
-            element={
-              <>
-                <Navbar />
-                <Explore />
-                <Footer />
-              </>
-            }
-          />
+        <div className="font-sans text-gray-800">
+          <Routes>
+            {/* Home Page */}
+            <Route
+              path="/"
+              element={
+                <>
+                  <Navbar />
+                  <Hero />
+                  <About />
+                  <Features />
+                  <HowItWorks />
+                  <Influencers />
+                  <BrandStories />
+                  <Footer />
+                </>
+              }
+            />
 
-          {/* Public Creator Profile (dynamic) */}
-          <Route
-            path="/creator/:id"
-            element={
-              <>
-                <Navbar />
-                <CreatorProfile />
-                <Footer />
-              </>
-            }
-          />
+            {/* Explore Page */}
+            <Route
+              path="/explore"
+              element={
+                <>
+                  <Navbar />
+                  <Explore />
+                  <Footer />
+                </>
+              }
+            />
 
-          {/* Creator Signup */}
-          <Route
-            path="/creator-sign-up"
-            element={
-              <>
-                <Navbar />
-                <CreatorSignUp />
-              </>
-            }
-          />
+            {/* Public Creator Profile (dynamic) */}
+            <Route
+              path="/creator/:id"
+              element={
+                <>
+                  <Navbar />
+                  <CreatorProfile />
+                  <Footer />
+                </>
+              }
+            />
 
-          {/* Editable Creator Profile */}
-          <Route
-            path="/creator-profile"
-            element={
-              <>
-                <Navbar />
-                <CreatorWelcome />
-                <Footer />
-              </>
-            }
-          />
+            {/* Creator Login */}
+            <Route
+              path="/creator-login"
+              element={
+                <>
+                  <Navbar />
+                  <CreatorLogin />
+                  <Footer />
+                </>
+              }
+            />
 
-          {/* Creator Dashboard (nested routes) */}
-          <Route path="/creator-dashboard" element={<CreatorDashboard />}>
-            <Route index element={<CreatorDashboardHome />} />
-            <Route path="opportunities" element={<CreatorOpportunities />} />
-            <Route path="messages" element={<CreatorMessages />} />
-            <Route path="meetings" element={<CreatorMeetings />} />
-            <Route path="earnings" element={<CreatorEarnings />} />
-          </Route>
+            {/* Brand Login */}
+            <Route
+              path="/brand-login"
+              element={
+                <>
+                  <Navbar />
+                  <BrandLogin />
+                  <Footer />
+                </>
+              }
+            />
 
-          {/* Optional legacy alias */}
-          <Route
-            path="/creator-welcome-page"
-            element={
-              <>
-                <Navbar />
-                <CreatorWelcome />
-                <Footer />
-              </>
-            }
-          />
+            {/* Creator Signup */}
+            <Route
+              path="/creator-sign-up"
+              element={
+                <>
+                  <Navbar />
+                  <CreatorSignUp />
+                </>
+              }
+            />
 
-          {/* Brand Signup */}
-          <Route
-            path="/brand-sign-up"
-            element={
-              <>
-                <Navbar />
-                <BrandSignup />
-              </>
-            }
-          />
+            {/* Editable Creator Profile */}
+            <Route
+              path="/creator-profile"
+              element={
+                <>
+                  <Navbar />
+                  <CreatorWelcome />
+                  <Footer />
+                </>
+              }
+            />
 
-          {/* Brand Profile */}
-          <Route
-            path="/brand-profile"
-            element={
-              <>
-                <Navbar />
-                <BrandProfile />
-                <Footer />
-              </>
-            }
-          />
+            {/* Creator Dashboard (nested routes) */}
+            <Route path="/creator-dashboard" element={<CreatorDashboard />}>
+              <Route index element={<CreatorDashboardHome />} />
+              {/* If you added "CreatorCampaigns.jsx", enable this route: */}
+              {/* <Route path="campaigns" element={<CreatorCampaigns />} /> */}
+              <Route path="opportunities" element={<CreatorOpportunities />} />
+              <Route path="messages" element={<CreatorMessages />} />
+              <Route path="meetings" element={<CreatorMeetings />} />
+              <Route path="earnings" element={<CreatorEarnings />} />
+            </Route>
 
-          {/* Brand Dashboard (nested routes) */}
-          <Route path="/brand-dashboard" element={<BrandDashboard />}>
-            <Route index element={<DashboardHome />} />
-            <Route path="campaigns" element={<Campaigns />} />
-            <Route path="messages" element={<Messages />} />
-            <Route path="meetings" element={<Meetings />} />
-            <Route path="payments" element={<Payments />} />
-          </Route>
+            {/* Optional legacy alias */}
+            <Route
+              path="/creator-welcome-page"
+              element={
+                <>
+                  <Navbar />
+                  <CreatorWelcome />
+                  <Footer />
+                </>
+              }
+            />
 
-          {/* Optional legacy alias */}
-          <Route path="/brand-profile-page" element={<BrandDashboard />}>
-            <Route index element={<DashboardHome />} />
-            <Route path="campaigns" element={<Campaigns />} />
-            <Route path="messages" element={<Messages />} />
-            <Route path="meetings" element={<Meetings />} />
-            <Route path="payments" element={<Payments />} />
-          </Route>
-        </Routes>
-      </div>
-    </Router>
+            {/* Brand Signup */}
+            <Route
+              path="/brand-sign-up"
+              element={
+                <>
+                  <Navbar />
+                  <BrandSignup />
+                </>
+              }
+            />
+
+            {/* Brand Profile */}
+            <Route
+              path="/brand-profile"
+              element={
+                <>
+                  <Navbar />
+                  <BrandProfile />
+                  <Footer />
+                </>
+              }
+            />
+
+            {/* Brand Dashboard (nested routes) */}
+            <Route path="/brand-dashboard" element={<BrandDashboard />}>
+              <Route index element={<DashboardHome />} />
+              <Route path="campaigns" element={<Campaigns />} />
+              <Route path="messages" element={<Messages />} />
+              <Route path="meetings" element={<Meetings />} />
+              <Route path="payments" element={<Payments />} />
+            </Route>
+
+            {/* Optional legacy alias */}
+            <Route path="/brand-profile-page" element={<BrandDashboard />}>
+              <Route index element={<DashboardHome />} />
+              <Route path="campaigns" element={<Campaigns />} />
+              <Route path="messages" element={<Messages />} />
+              <Route path="meetings" element={<Meetings />} />
+              <Route path="payments" element={<Payments />} />
+            </Route>
+          </Routes>
+        </div>
+      </Router>
+    </LoginModalProvider>
   );
 };
 

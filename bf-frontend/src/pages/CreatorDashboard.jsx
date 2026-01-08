@@ -10,6 +10,7 @@ import {
   FiX,
   FiBell,
   FiUser,
+  FiLogOut,
 } from "react-icons/fi";
 
 const CREATOR_PROFILE_KEY = "creator_profile";
@@ -26,7 +27,8 @@ function loadCreatorFromStorage() {
     return null;
   }
 
-  const image = localStorage.getItem(CREATOR_IMAGE_KEY) || data.profileImageDataUrl || "";
+  const image =
+    localStorage.getItem(CREATOR_IMAGE_KEY) || data.profileImageDataUrl || "";
 
   return {
     fullName: data.fullName || "",
@@ -78,11 +80,38 @@ export default function CreatorDashboard() {
 
   const navItems = [
     { name: "Dashboard", to: "/creator-dashboard", icon: <FiHome /> },
-    { name: "Opportunities", to: "/creator-dashboard/opportunities", icon: <FiBriefcase /> },
-    { name: "Messages", to: "/creator-dashboard/messages", icon: <FiMessageSquare /> },
-    { name: "Meetings", to: "/creator-dashboard/meetings", icon: <FiCalendar /> },
-    { name: "Earnings", to: "/creator-dashboard/earnings", icon: <FiDollarSign /> },
+    {
+      name: "Opportunities",
+      to: "/creator-dashboard/opportunities",
+      icon: <FiBriefcase />,
+    },
+    {
+      name: "Messages",
+      to: "/creator-dashboard/messages",
+      icon: <FiMessageSquare />,
+    },
+    {
+      name: "Meetings",
+      to: "/creator-dashboard/meetings",
+      icon: <FiCalendar />,
+    },
+    {
+      name: "Earnings",
+      to: "/creator-dashboard/earnings",
+      icon: <FiDollarSign />,
+    },
   ];
+
+  const handleLogout = () => {
+    // frontend-only logout:
+    // remove auth flag if you set it in creator-login page
+    try {
+      localStorage.removeItem("creator_auth");
+    } catch {}
+
+    // optional: keep profile saved, just logout and go to login page
+    navigate("/creator-login");
+  };
 
   if (!creator) return null;
 
@@ -109,7 +138,9 @@ export default function CreatorDashboard() {
               <h1 className="text-xl font-extrabold bg-gradient-to-r from-sky-600 via-indigo-600 to-fuchsia-600 bg-clip-text text-transparent">
                 Creator Studio
               </h1>
-              <p className="text-xs text-slate-500">Manage your profile & deals</p>
+              <p className="text-xs text-slate-500">
+                Manage your profile & deals
+              </p>
             </div>
 
             <button
@@ -144,8 +175,9 @@ export default function CreatorDashboard() {
             ))}
           </nav>
 
-          {/* Profile link (go to your existing creator-profile page) */}
-          <div className="p-4 border-t border-slate-100">
+          {/* Profile + Logout */}
+          <div className="p-4 border-t border-slate-100 space-y-3">
+            {/* Profile link */}
             <button
               type="button"
               onClick={() => navigate("/creator-profile")}
@@ -167,9 +199,27 @@ export default function CreatorDashboard() {
                 <p className="text-sm font-bold text-slate-900 truncate">
                   {creator.fullName || "Creator"}
                 </p>
-                <p className="text-xs text-slate-500 truncate">{creator.email}</p>
+                <p className="text-xs text-slate-500 truncate">
+                  {creator.email}
+                </p>
               </div>
-              <span className="ml-auto text-xs font-bold text-indigo-700">Profile</span>
+              <span className="ml-auto text-xs font-bold text-indigo-700">
+                Profile
+              </span>
+            </button>
+
+            {/* ✅ Logout button (new) */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl
+border border-gray-400 bg-white text-gray-800 font-semibold
+hover:bg-red-200 hover:border-red-300 hover:text-red-600
+transition-colors"
+              title="Logout"
+            >
+              <FiLogOut />
+              Logout
             </button>
           </div>
         </div>
@@ -188,7 +238,9 @@ export default function CreatorDashboard() {
             >
               <FiMenu size={22} />
             </button>
-            <h2 className="text-xl font-extrabold text-slate-900">{pageTitle}</h2>
+            <h2 className="text-xl font-extrabold text-slate-900">
+              {pageTitle}
+            </h2>
           </div>
 
           <button

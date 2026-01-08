@@ -7,6 +7,7 @@ import {
   FiMenu,
   FiX,
   FiBell,
+  FiLogOut,
 } from "react-icons/fi";
 import { FaBullhorn, FaMoneyBillWave } from "react-icons/fa";
 
@@ -14,7 +15,6 @@ const BRAND_USER_KEY = "brandfluencer_brand_user";
 const CAMPAIGNS_KEY = "brand_dashboard_campaigns";
 
 function toNumberSafe(v) {
-  // supports numbers, "12,450", "$5,000", "PKR 250000"
   if (typeof v === "number") return Number.isFinite(v) ? v : 0;
   const s = String(v ?? "").trim();
   if (!s) return 0;
@@ -30,9 +30,11 @@ function toNumberSafe(v) {
 }
 
 function normalizeCurrency(c) {
-  const v = String(c || "").toUpperCase().trim();
+  const v = String(c || "")
+    .toUpperCase()
+    .trim();
   if (v === "PKR") return "PKR";
-  return "USD"; // default
+  return "USD";
 }
 
 export default function BrandDashboard() {
@@ -64,7 +66,6 @@ export default function BrandDashboard() {
       setCampaigns([]);
     }
 
-    // Sync when localStorage changes (other tab / window)
     const onStorage = (e) => {
       if (e.key === CAMPAIGNS_KEY) {
         try {
@@ -79,11 +80,9 @@ export default function BrandDashboard() {
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  // Stats computed from campaigns (supports new & old campaign formats)
   const stats = useMemo(() => {
     let activeCampaigns = 0;
     let totalReach = 0;
-
     let totalSpentUSD = 0;
     let totalSpentPKR = 0;
 
@@ -91,10 +90,8 @@ export default function BrandDashboard() {
       const status = String(c?.status || "").trim();
       if (status === "Active") activeCampaigns += 1;
 
-      // reach
       totalReach += toNumberSafe(c?.reach);
 
-      // budget + currency
       const currency = normalizeCurrency(c?.currency);
       const budget = toNumberSafe(c?.budget);
 
@@ -102,15 +99,9 @@ export default function BrandDashboard() {
       else totalSpentUSD += budget;
     }
 
-    return {
-      activeCampaigns,
-      totalReach,
-      totalSpentUSD,
-      totalSpentPKR,
-    };
+    return { activeCampaigns, totalReach, totalSpentUSD, totalSpentPKR };
   }, [campaigns]);
 
-  // Called by Campaigns page after add/remove
   const onCampaignsChange = (nextCampaigns) => {
     setCampaigns(Array.isArray(nextCampaigns) ? nextCampaigns : []);
   };
@@ -125,11 +116,31 @@ export default function BrandDashboard() {
 
   const navItems = [
     { name: "Dashboard", to: "/brand-dashboard", icon: <FiHome /> },
-    { name: "Campaigns", to: "/brand-dashboard/campaigns", icon: <FaBullhorn /> },
-    { name: "Messages", to: "/brand-dashboard/messages", icon: <FiMessageSquare /> },
+    {
+      name: "Campaigns",
+      to: "/brand-dashboard/campaigns",
+      icon: <FaBullhorn />,
+    },
+    {
+      name: "Messages",
+      to: "/brand-dashboard/messages",
+      icon: <FiMessageSquare />,
+    },
     { name: "Meetings", to: "/brand-dashboard/meetings", icon: <FiCalendar /> },
-    { name: "Payments", to: "/brand-dashboard/payments", icon: <FaMoneyBillWave /> },
+    {
+      name: "Payments",
+      to: "/brand-dashboard/payments",
+      icon: <FaMoneyBillWave />,
+    },
   ];
+
+  // ✅ NEW: Logout (frontend-only)
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem("brand_auth");
+    } catch {}
+    navigate("/brand-login");
+  };
 
   return (
     <div className="flex h-screen bg-[#fffaf5]">
@@ -186,7 +197,7 @@ export default function BrandDashboard() {
           </nav>
 
           {/* Brand Profile link */}
-          <div className="p-4 border-t border-gray-100">
+          <div className="p-4 border-t border-gray-100 space-y-3">
             <button
               type="button"
               onClick={() => navigate("/brand-profile")}
@@ -194,7 +205,9 @@ export default function BrandDashboard() {
               title="Go to Brand Profile"
             >
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff6a00] to-[#e7a833] flex items-center justify-center text-white font-bold">
-                {String(brandName || "B").charAt(0).toUpperCase()}
+                {String(brandName || "B")
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
               <div className="flex-1 min-w-0 text-left">
                 <p className="text-sm font-semibold text-gray-700 truncate">
@@ -203,6 +216,19 @@ export default function BrandDashboard() {
                 <p className="text-xs text-gray-500">Brand Profile</p>
               </div>
               <span className="text-xs text-[#ff6a00] font-semibold">Open</span>
+            </button>
+
+            {/* ✅ NEW: Logout button */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl
+border border-gray-400 bg-white text-gray-800 font-semibold
+hover:bg-red-200 hover:border-red-300 hover:text-red-600
+transition-colors" title="Logout"
+            >
+              <FiLogOut />
+              Logout
             </button>
           </div>
         </div>
@@ -225,7 +251,6 @@ export default function BrandDashboard() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Notification bell */}
             <button
               type="button"
               className="relative p-2 rounded-lg hover:bg-gray-100 text-gray-700 transition"
@@ -235,7 +260,6 @@ export default function BrandDashboard() {
               <span className="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-red-500" />
             </button>
 
-            {/* Create Campaign */}
             <button
               type="button"
               onClick={() => navigate("/brand-dashboard/campaigns?new=1")}
