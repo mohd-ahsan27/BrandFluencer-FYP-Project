@@ -12,6 +12,7 @@ import About from "./components/About";
 import Features from "./components/Features";
 import HowItWorks from "./components/HowItWorks";
 import Influencers from "./components/Influencers";
+// import CreatorCard from "./components/CreatorCard";
 import BrandStories from "./components/BrandStories";
 import Footer from "./components/Footer";
 
@@ -65,6 +66,7 @@ const App = () => {
                   <Features />
                   <HowItWorks />
                   <Influencers />
+                  {/* <CreatorCard /> */}
                   <BrandStories />
                   <Footer />
                 </>
@@ -100,7 +102,7 @@ const App = () => {
               path="/creator-login"
               element={
                 <>
-                  <Navbar />
+                  {/* <Navbar /> */}
                   <CreatorLogin />
                   <Footer />
                 </>
@@ -112,7 +114,7 @@ const App = () => {
               path="/brand-login"
               element={
                 <>
-                  <Navbar />
+                  {/* <Navbar /> */}
                   <BrandLogin />
                   <Footer />
                 </>
