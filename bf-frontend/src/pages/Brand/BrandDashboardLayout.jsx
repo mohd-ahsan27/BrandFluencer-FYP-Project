@@ -30,14 +30,33 @@ function toNumberSafe(v) {
 }
 
 function normalizeCurrency(c) {
-  const v = String(c || "")
-    .toUpperCase()
-    .trim();
-  if (v === "PKR") return "PKR";
-  return "USD";
+  const v = String(c || "").toUpperCase().trim();
+  return v === "PKR" ? "PKR" : "USD";
 }
 
-export default function BrandDashboard() {
+function loadBrandName() {
+  const raw = localStorage.getItem(BRAND_USER_KEY);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed.companyName || parsed.fullName || "Brand";
+  } catch {
+    return null;
+  }
+}
+
+function loadCampaigns() {
+  const raw = localStorage.getItem(CAMPAIGNS_KEY);
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export default function BrandDashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -46,39 +65,26 @@ export default function BrandDashboard() {
   const [campaigns, setCampaigns] = useState([]);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem(BRAND_USER_KEY);
-    if (storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser);
-        setBrandName(parsed.companyName || parsed.fullName || "Brand");
-      } catch {}
+    const name = loadBrandName();
+    if (!name) {
+      // ✅ behave like creator dashboard: if no brand profile saved, go signup
+      navigate("/brand-sign-up");
+      return;
     }
-
-    const storedCampaigns = localStorage.getItem(CAMPAIGNS_KEY);
-    if (storedCampaigns) {
-      try {
-        const parsed = JSON.parse(storedCampaigns);
-        setCampaigns(Array.isArray(parsed) ? parsed : []);
-      } catch {
-        setCampaigns([]);
-      }
-    } else {
-      setCampaigns([]);
-    }
+    setBrandName(name);
+    setCampaigns(loadCampaigns());
 
     const onStorage = (e) => {
-      if (e.key === CAMPAIGNS_KEY) {
-        try {
-          const next = e.newValue ? JSON.parse(e.newValue) : [];
-          setCampaigns(Array.isArray(next) ? next : []);
-        } catch {
-          setCampaigns([]);
-        }
+      if (e.key === CAMPAIGNS_KEY) setCampaigns(loadCampaigns());
+      if (e.key === BRAND_USER_KEY) {
+        const nextName = loadBrandName();
+        if (nextName) setBrandName(nextName);
       }
     };
+
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
-  }, []);
+  }, [navigate]);
 
   const stats = useMemo(() => {
     let activeCampaigns = 0;
@@ -103,7 +109,10 @@ export default function BrandDashboard() {
   }, [campaigns]);
 
   const onCampaignsChange = (nextCampaigns) => {
-    setCampaigns(Array.isArray(nextCampaigns) ? nextCampaigns : []);
+    const safe = Array.isArray(nextCampaigns) ? nextCampaigns : [];
+    setCampaigns(safe);
+    // ✅ persist
+    localStorage.setItem(CAMPAIGNS_KEY, JSON.stringify(safe));
   };
 
   const pageTitle = useMemo(() => {
@@ -116,35 +125,19 @@ export default function BrandDashboard() {
 
   const navItems = [
     { name: "Dashboard", to: "/brand-dashboard", icon: <FiHome /> },
-    {
-      name: "Campaigns",
-      to: "/brand-dashboard/campaigns",
-      icon: <FaBullhorn />,
-    },
-    {
-      name: "Messages",
-      to: "/brand-dashboard/messages",
-      icon: <FiMessageSquare />,
-    },
+    { name: "Campaigns", to: "/brand-dashboard/campaigns", icon: <FaBullhorn /> },
+    { name: "Messages", to: "/brand-dashboard/messages", icon: <FiMessageSquare /> },
     { name: "Meetings", to: "/brand-dashboard/meetings", icon: <FiCalendar /> },
-    {
-      name: "Payments",
-      to: "/brand-dashboard/payments",
-      icon: <FaMoneyBillWave />,
-    },
+    { name: "Payments", to: "/brand-dashboard/payments", icon: <FaMoneyBillWave /> },
   ];
 
-  // ✅ NEW: Logout (frontend-only)
   const handleLogout = () => {
-    try {
-      localStorage.removeItem("brand_auth");
-    } catch {}
+    localStorage.removeItem("brand_auth");
     navigate("/brand-login");
   };
 
   return (
     <div className="flex h-screen bg-[#fffaf5]">
-      {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-20 lg:hidden"
@@ -152,14 +145,12 @@ export default function BrandDashboard() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         <div className="flex flex-col h-full">
-          {/* Logo */}
           <div className="h-20 flex items-center justify-between px-8 border-b border-gray-100">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-[#ff6a00] to-[#e7a833] bg-clip-text text-transparent">
               BrandFluencer
@@ -174,7 +165,6 @@ export default function BrandDashboard() {
             </button>
           </div>
 
-          {/* Nav Links */}
           <nav className="flex-1 px-4 py-6 space-y-2">
             {navItems.map((item) => (
               <NavLink
@@ -196,7 +186,6 @@ export default function BrandDashboard() {
             ))}
           </nav>
 
-          {/* Brand Profile link */}
           <div className="p-4 border-t border-gray-100 space-y-3">
             <button
               type="button"
@@ -205,27 +194,22 @@ export default function BrandDashboard() {
               title="Go to Brand Profile"
             >
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff6a00] to-[#e7a833] flex items-center justify-center text-white font-bold">
-                {String(brandName || "B")
-                  .charAt(0)
-                  .toUpperCase()}
+                {String(brandName || "B").charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0 text-left">
-                <p className="text-sm font-semibold text-gray-700 truncate">
-                  {brandName}
-                </p>
+                <p className="text-sm font-semibold text-gray-700 truncate">{brandName}</p>
                 <p className="text-xs text-gray-500">Brand Profile</p>
               </div>
               <span className="text-xs text-[#ff6a00] font-semibold">Open</span>
             </button>
 
-            {/* ✅ NEW: Logout button */}
             <button
               type="button"
               onClick={handleLogout}
               className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl
-border border-gray-400 bg-white text-gray-800 font-semibold
-hover:bg-red-200 hover:border-red-300 hover:text-red-600
-transition-colors" title="Logout"
+                         border border-gray-300 bg-white text-gray-800 font-semibold
+                         hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors"
+              title="Logout"
             >
               <FiLogOut />
               Logout
@@ -234,9 +218,7 @@ transition-colors" title="Logout"
         </div>
       </aside>
 
-      {/* Main */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Header */}
         <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-10 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
@@ -270,16 +252,8 @@ transition-colors" title="Logout"
           </div>
         </header>
 
-        {/* Routed Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <Outlet
-            context={{
-              brandName,
-              stats,
-              campaigns,
-              onCampaignsChange,
-            }}
-          />
+          <Outlet context={{ brandName, stats, campaigns, onCampaignsChange }} />
         </div>
       </main>
     </div>

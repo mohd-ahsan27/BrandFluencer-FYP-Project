@@ -102,7 +102,7 @@ const Hero = () => {
                      flex items-center justify-center gap-3"
         >
           <span>Join as Creator</span>
-          <span>✨</span>
+         
         </Link>
       </motion.div>
 

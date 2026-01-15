@@ -9,16 +9,18 @@ import {
   FiAlertCircle,
 } from "react-icons/fi";
 
-const BRAND_STORAGE_KEY = "brandfluencer_brand_user";
+const CREATOR_PROFILE_KEY = "creator_profile";
+const CREATOR_IMAGE_KEY = "creator_profile_image";
 
 /**
- * Demo login logic (frontend-only):
- * - Checks localStorage for brand user saved during signup.
- * - Matches workEmail + password (your signup uses 6-digit password).
+ * Demo Creator login (frontend-only):
+ * - Reads creator_profile from localStorage
+ * - Matches email + password (expects your signup stored "password")
  *
- * For real apps: replace with API authentication.
+ * If your Creator signup does NOT store a password yet,
+ * see note below: you can either add it in signup or change login check.
  */
-export default function BrandLogin() {
+export default function CreatorLogin() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ email: "", password: "" });
@@ -33,9 +35,9 @@ export default function BrandLogin() {
     e.preventDefault();
     setError("");
 
-    const raw = localStorage.getItem(BRAND_STORAGE_KEY);
+    const raw = localStorage.getItem(CREATOR_PROFILE_KEY);
     if (!raw) {
-      setError("No brand account found. Please sign up first.");
+      setError("No creator account found. Please sign up first.");
       return;
     }
 
@@ -43,14 +45,32 @@ export default function BrandLogin() {
     try {
       saved = JSON.parse(raw);
     } catch {
-      setError("Stored brand data is corrupted. Please sign up again.");
+      setError("Stored creator data is corrupted. Please sign up again.");
       return;
     }
 
-    const savedEmail = String(saved?.workEmail || "").trim().toLowerCase();
-    const savedPass = String(saved?.password || "").trim(); // your signup is 6 digits
+    const savedEmail = String(saved?.email || "").trim().toLowerCase();
+    const savedPass = String(saved?.password || "").trim(); // must exist from signup
     const enteredEmail = String(form.email || "").trim().toLowerCase();
     const enteredPass = String(form.password || "").trim();
+
+    if (!savedEmail) {
+      setError("Creator profile is missing email. Please sign up again.");
+      return;
+    }
+
+    // IMPORTANT:
+    // If you don't store password in creator_profile during signup,
+    // this will always fail. You can either:
+    // 1) store password in creator_profile at signup
+    // OR
+    // 2) remove password check (not recommended).
+    if (!savedPass) {
+      setError(
+        "Password is not saved in creator profile. Add password saving in creator signup to use login."
+      );
+      return;
+    }
 
     if (enteredEmail !== savedEmail) {
       setError("Email not found. Please check your email.");
@@ -63,41 +83,51 @@ export default function BrandLogin() {
     }
 
     // Set a simple "session" flag (frontend-only)
-    localStorage.setItem("brand_auth", JSON.stringify({ loggedIn: true, at: Date.now() }));
+    localStorage.setItem(
+      "creator_auth",
+      JSON.stringify({ loggedIn: true, at: Date.now() })
+    );
 
-    // After successful login, go to dashboard (or brand profile)
-    navigate("/brand-dashboard");
+    // After successful login
+    navigate("/creator-dashboard");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-50 flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-white to-indigo-50 flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left marketing panel */}
-        <div className="hidden lg:block rounded-3xl bg-gradient-to-br from-[#5b2333] via-[#7a2d43] to-[#ff6a00] p-10 text-white shadow-[0_20px_60px_-40px_rgba(0,0,0,0.6)]">
+        {/* Left panel */}
+        <div className="hidden lg:block rounded-3xl bg-gradient-to-br from-sky-600 via-indigo-600 to-fuchsia-600 p-10 text-white shadow-[0_20px_60px_-40px_rgba(0,0,0,0.6)]">
           <h1 className="text-4xl font-extrabold leading-tight">
-            Welcome back, Brand.
+            Welcome back, Creator.
           </h1>
           <p className="mt-4 text-white/85 text-lg">
-            Log in to manage campaigns, messages, meetings, and payments in one place.
+            Log in to manage your profile, opportunities, campaigns, messages, and earnings.
           </p>
 
           <div className="mt-10 rounded-2xl bg-white/10 border border-white/15 p-6">
-            <p className="text-sm font-semibold text-white/90">
-              Tip for demo login
-            </p>
+            <p className="text-sm font-semibold text-white/90">Tip</p>
             <p className="mt-2 text-sm text-white/80">
-              Use the <span className="font-semibold">Work Email</span> and
-              <span className="font-semibold"> 6-digit password</span> you entered
-              during Brand Sign Up.
+              Use the <span className="font-semibold">Email</span> and
+              <span className="font-semibold"> Password</span> you entered during Creator Sign Up.
+            </p>
+          </div>
+
+          {/* subtle preview card */}
+          <div className="mt-6 rounded-2xl bg-white/10 border border-white/15 p-6">
+            <p className="text-sm font-semibold text-white/90">Creator Studio</p>
+            <p className="mt-2 text-sm text-white/80">
+              Track deals, schedule meetings, and keep everything organized.
             </p>
           </div>
         </div>
 
-        {/* Right form card */}
-        <div className="rounded-3xl bg-white border border-gray-200 shadow-sm p-6 sm:p-8">
+        {/* Right form */}
+        <div className="rounded-3xl bg-white border border-slate-200 shadow-sm p-6 sm:p-8">
           <div className="mb-6">
-            <h2 className="text-2xl font-extrabold text-gray-900">Brand Login</h2>
-            <p className="mt-1 text-gray-600">
+            <h2 className="text-2xl font-extrabold text-slate-900">
+              Creator Login
+            </h2>
+            <p className="mt-1 text-slate-600">
               Enter your credentials to continue.
             </p>
           </div>
@@ -115,8 +145,8 @@ export default function BrandLogin() {
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-                placeholder="brand@company.com"
-                className="w-full bg-transparent outline-none text-sm text-gray-900"
+                placeholder="creator@email.com"
+                className="w-full bg-transparent outline-none text-sm text-slate-900"
                 autoComplete="email"
               />
             </Field>
@@ -129,14 +159,14 @@ export default function BrandLogin() {
                   onChange={(e) =>
                     setForm((p) => ({ ...p, password: e.target.value }))
                   }
-                  placeholder="6-digit password"
-                  className="flex-1 bg-transparent outline-none text-sm text-gray-900"
+                  placeholder="Your password"
+                  className="flex-1 bg-transparent outline-none text-sm text-slate-900"
                   autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPass((s) => !s)}
-                  className="p-2 rounded-xl hover:bg-gray-100 text-gray-600 transition"
+                  className="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition"
                   title={showPass ? "Hide password" : "Show password"}
                 >
                   {showPass ? <FiEyeOff /> : <FiEye />}
@@ -145,14 +175,14 @@ export default function BrandLogin() {
             </Field>
 
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm text-gray-600 select-none">
-                <input type="checkbox" className="rounded border-gray-300" />
+              <label className="flex items-center gap-2 text-sm text-slate-600 select-none">
+                <input type="checkbox" className="rounded border-slate-300" />
                 Remember me
               </label>
 
               <button
                 type="button"
-                className="text-sm font-semibold text-[#ff6a00] hover:underline"
+                className="text-sm font-semibold text-indigo-700 hover:underline"
                 onClick={() => setError("Forgot password requires backend/email flow.")}
               >
                 Forgot password?
@@ -165,18 +195,18 @@ export default function BrandLogin() {
               className={[
                 "w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-semibold transition shadow-sm",
                 canSubmit
-                  ? "bg-gradient-to-r from-[#ff6a00] to-[#e7a833] text-white hover:opacity-95"
-                  : "bg-gray-100 text-gray-400 cursor-not-allowed",
+                  ? "bg-gradient-to-r from-sky-600 via-indigo-600 to-fuchsia-600 text-white hover:opacity-95"
+                  : "bg-slate-100 text-slate-400 cursor-not-allowed",
               ].join(" ")}
             >
               <FiLogIn />
               Login
             </button>
 
-            <p className="text-sm text-gray-600 text-center">
-              Don’t have a brand account?{" "}
+            <p className="text-sm text-slate-600 text-center">
+              Don’t have a creator account?{" "}
               <Link
-                to="/brand-sign-up"
+                to="/creator-sign-up"
                 className="font-semibold text-indigo-700 hover:underline"
               >
                 Create one
@@ -184,12 +214,6 @@ export default function BrandLogin() {
             </p>
           </form>
 
-          <div className="mt-6 border-t border-gray-100 pt-5">
-            <p className="text-xs text-gray-500">
-              This login is frontend-only (localStorage). For production, replace
-              with a backend auth system.
-            </p>
-          </div>
         </div>
       </div>
     </div>
@@ -199,9 +223,9 @@ export default function BrandLogin() {
 function Field({ label, icon, children }) {
   return (
     <div>
-      <label className="text-sm font-semibold text-gray-800">{label}</label>
-      <div className="mt-2 flex items-center gap-3 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 focus-within:ring-2 focus-within:ring-orange-200 transition">
-        <span className="text-gray-500">{icon}</span>
+      <label className="text-sm font-semibold text-slate-800">{label}</label>
+      <div className="mt-2 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 focus-within:ring-2 focus-within:ring-indigo-200 transition">
+        <span className="text-slate-500">{icon}</span>
         {children}
       </div>
     </div>

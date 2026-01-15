@@ -42,7 +42,7 @@ const Features = () => {
     },
     {
       title: "Instant Campaign Launch",
-      desc: "Create and launch campaigns in minutes — from influencer search to results tracking.",
+      desc: "Create and launch campaigns in minutes from influencer search to results tracking.",
       Icon: FaBolt,
       grad: "from-amber-300 to-pink-400",
     },
