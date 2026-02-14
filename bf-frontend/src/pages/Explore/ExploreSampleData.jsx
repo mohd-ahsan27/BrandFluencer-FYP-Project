@@ -1,38 +1,104 @@
-import CreatorCard from "../components/CreatorCard";
-import creators from "../data/creatorSampleData";
-
-const Explore = () => {
-  return (
-    <div className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="max-w-7xl mx-auto">
-        
-        <h1 className="text-2xl font-bold mb-6">
-          Explore Creators
-        </h1>
-
-        {/* Filters (UI only for now) */}
-        <div className="flex flex-wrap gap-3 mb-8">
-          {["Platform", "Category", "Location", "Price", "Gender"].map(
-            (item) => (
-              <button
-                key={item}
-                className="px-4 py-2 rounded-full border bg-white text-sm hover:bg-gray-100"
-              >
-                {item}
-              </button>
-            )
-          )}
-        </div>
-
-        {/* Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {creators.map((creator) => (
-            <CreatorCard key={creator.id} creator={creator} />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Explore;
+export const creators = [
+  {
+    id: "c1",
+    name: "Aria Chen",
+    niche: "Lifestyle & Fashion",
+    bio: "Curating a life of aesthetics and tech. Helping brands reach Gen‑Z through authentic storytelling.",
+    tags: ["#OOTD", "#Streetwear", "#Tech"],
+    followers: 500000,
+    engagementRate: 4.2,
+    rating: 4.7,
+    reviewsCount: 128,
+    verified: true,
+    trending: false,
+    image:
+      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=1200&auto=format&fit=crop&q=60",
+    platforms: { instagram: true, tiktok: true, youtube: false, facebook: false, snapchat: true },
+    categories: ["Fashion", "Lifestyle", "Tech"],
+  },
+  {
+    id: "c2",
+    name: "Marcus Thorne",
+    niche: "Fitness & Wellness",
+    bio: "Bodyweight training specialist and nutritional consultant. Transforming lives through movement.",
+    tags: ["#Fitness", "#Biohacking"],
+    followers: 120000,
+    engagementRate: 6.8,
+    rating: 4.2,
+    reviewsCount: 52,
+    verified: false,
+    trending: true,
+    image:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=1200&auto=format&fit=crop&q=60",
+    platforms: { instagram: true, tiktok: true, youtube: true, facebook: false, snapchat: false },
+    categories: ["Fitness", "Health"],
+  },
+  {
+    id: "c3",
+    name: "Elena Rossi",
+    niche: "Beauty & Skincare",
+    bio: "Unfiltered skincare reviews and high-end makeup tutorials. Your guide to glowy skin.",
+    tags: ["#Skincare", "#Luxury"],
+    followers: 2400000,
+    engagementRate: 3.1,
+    rating: 4.9,
+    reviewsCount: 201,
+    verified: false,
+    trending: false,
+    image:
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=1200&auto=format&fit=crop&q=60",
+    platforms: { instagram: true, tiktok: false, youtube: true, facebook: true, snapchat: false },
+    categories: ["Beauty", "Luxury"],
+  },
+  {
+    id: "c4",
+    name: "Sarah Jenkins",
+    niche: "Adventure Travel",
+    bio: "Exploring the world's most remote places. Visual storyteller and drone pilot.",
+    tags: ["#Travel", "#Photography"],
+    followers: 850000,
+    engagementRate: 5.5,
+    rating: 4.6,
+    reviewsCount: 89,
+    verified: false,
+    trending: false,
+    image:
+      "https://images.unsplash.com/photo-1524503033411-f7a2b7c2f1b2?w=1200&auto=format&fit=crop&q=60",
+    platforms: { instagram: true, tiktok: true, youtube: true, facebook: false, snapchat: false },
+    categories: ["Travel", "Photography"],
+  },
+  {
+    id: "c5",
+    name: "David K.",
+    niche: "Consumer Electronics",
+    bio: "Weekly gadget reviews and futuristic setup inspiration. Minimalist tech advocate.",
+    tags: ["#Setup", "#Minimalism"],
+    followers: 340000,
+    engagementRate: 4.9,
+    rating: 4.3,
+    reviewsCount: 41,
+    verified: false,
+    trending: false,
+    image:
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&auto=format&fit=crop&q=60",
+    platforms: { instagram: true, tiktok: false, youtube: true, facebook: true, snapchat: false },
+    categories: ["Tech"],
+  },
+  {
+    id: "c6",
+    name: "Maya Zen",
+    niche: "Yoga & Mindfulness",
+    bio: "Daily yoga flows and meditation practices. Cultivating peace in a digital world.",
+    tags: ["#Yoga", "#Mindful"],
+    followers: 620000,
+    engagementRate: 7.2,
+    rating: 4.8,
+    reviewsCount: 96,
+    verified: true,
+    trending: false,
+    image:
+      "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1200&auto=format&fit=crop&q=60",
+    platforms: { instagram: true, tiktok: true, youtube: false, facebook: false, snapchat: true },
+    categories: ["Health", "Lifestyle"],
+  },
+];

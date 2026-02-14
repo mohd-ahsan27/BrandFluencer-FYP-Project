@@ -15,7 +15,7 @@ import {
   FaBullseye,
 } from "react-icons/fa";
 
-/* ---------------- CONSTANTS ---------------- */
+
 const INDUSTRIES = [
   "Fashion",
   "Beauty",
@@ -71,7 +71,7 @@ export default function BrandSignUp() {
   const selectedCount = form.categories.length;
 
   const websiteLooksValid = (value) => {
-    if (!value.trim()) return true; // optional
+    if (!value.trim()) return true; 
     return /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/.test(
       value.trim()
     );
@@ -82,7 +82,7 @@ export default function BrandSignUp() {
     return vals.some((v) => String(v || "").trim().length > 0);
   };
 
-  /* ---------------- VALIDATION ---------------- */
+  
   const validate = () => {
     const e = {};
 
@@ -101,23 +101,23 @@ export default function BrandSignUp() {
     }
 
     if (step === 1) {
-      // Company name required
+     
       if (!form.companyName.trim()) e.companyName = "Company name required";
 
-      // Website optional, but if provided must be valid
+     
       if (!websiteLooksValid(form.companyWebsite))
         e.companyWebsite = "Enter a valid website (e.g., example.com)";
 
-      // Industry: at least 1, max 5 (max is enforced by UI too)
+      
       if (form.categories.length === 0)
         e.categories = "Select at least one industry";
       if (form.categories.length > 5)
         e.categories = "You can select a maximum of 5 industries";
-      // About Us + Target Audience are OPTIONAL now (no validation)
+   
     }
 
     if (step === 2) {
-      // Require at least one social handle
+    
       if (!hasAtLeastOneSocial())
         e.socials = "Please add at least 1 social media handle.";
     }
@@ -166,7 +166,7 @@ export default function BrandSignUp() {
     }
 
     localStorage.setItem("brandfluencer_brand_user", JSON.stringify(form));
-    navigate("/brand-profile");
+    navigate("/brand-dashboard");
   };
 
   const headerSubtitle = useMemo(() => {

@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 
 // About.jsx in src/components => correct:
-import marketingImg2 from "../assets/M_image2.png";
+import marketingImg2 from "../assets/Marketing_image.jfif";
 
 const About = () => {
   return (

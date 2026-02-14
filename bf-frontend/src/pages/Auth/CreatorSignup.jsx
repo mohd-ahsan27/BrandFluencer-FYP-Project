@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import { addCreator } from "../../data/creatorsStore";
 import {
   FaInstagram,
   FaYoutube,
@@ -17,6 +18,49 @@ const CATEGORIES = [
 
 const MAX_CATEGORIES = 5;
 const DRAFT_KEY = "brandfluencer_creator_draft_v6";
+
+function makeId() {
+  if (crypto && crypto.randomUUID) return crypto.randomUUID();
+  return `c_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+}
+
+const finalizeSubmit = () => {
+  const id = makeId();
+
+  const newCreator = {
+    id,
+    name: form.fullName,
+    email: form.email,
+    aboutMe: form.aboutMe || "",
+    categories: form.categories || [],
+    socials: form.socials || {
+      instagram: { handle: "" },
+      youtube: { handle: "" },
+      tiktok: { handle: "" },
+      facebook: { handle: "" },
+      snapchat: { handle: "" },
+    },
+    platforms: {
+      instagram: !!form.socials?.instagram?.handle,
+      youtube: !!form.socials?.youtube?.handle,
+      tiktok: !!form.socials?.tiktok?.handle,
+      facebook: !!form.socials?.facebook?.handle,
+      snapchat: !!form.socials?.snapchat?.handle,
+    },
+    followers: 50000,
+    engagementRate: 4.2,
+    rating: 4.6,
+    reviewsCount: 12,
+    verified: false,
+    trending: false,
+    profileImageDataUrl: form.profileImageDataUrl || "",
+  };
+
+  addCreator(newCreator);
+  localStorage.setItem("creator_profile", JSON.stringify(newCreator));
+  localStorage.setItem("userRole", "creator");
+  navigate("/creator-profile");
+};
 
 export default function CreatorSignUp() {
   const navigate = useNavigate();
@@ -110,7 +154,7 @@ export default function CreatorSignUp() {
         sessionStorage.setItem("creator_profile", JSON.stringify(form));
       } catch {}
     }
-    navigate("/creator-profile");
+    navigate("/creator-dashboard");
   };
 
   const StepTitle = ({ text }) => (
