@@ -68,6 +68,9 @@ export default function BrandSignUp() {
     },
   });
 
+  localStorage.setItem("userRole", "brand");
+// localStorage.setItem("userName", payload.companyName || "Brand");
+
   const selectedCount = form.categories.length;
 
   const websiteLooksValid = (value) => {

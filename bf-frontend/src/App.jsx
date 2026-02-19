@@ -5,7 +5,6 @@ import { LoginModalProvider } from "./context/LoginModalContext";
 import LoginChooserModal from "./components/LoginChooserModal";
 
 import Home from "./pages/Home/Home";
-import ExplorePage from "./pages/Explore/ExplorePage";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
@@ -14,7 +13,8 @@ import CreatorLogin from "./pages/Auth/CreatorLogin";
 import BrandSignup from "./pages/Auth/BrandSignup";
 import BrandLogin from "./pages/Auth/BrandLogin";
 
-import CreatorProfile from "./pages/Creator/CreatorProfile"; import PublicCreatorProfile from "./pages/Creator/PublicCreatorProfile";
+import CreatorProfile from "./pages/Creator/CreatorProfile";
+import PublicCreatorProfile from "./pages/Creator/PublicCreatorProfile";
 import CreatorDashboardLayout from "./pages/Creator/CreatorDashboardLayout";
 import CreatorDashboardHome from "./pages/Creator/CreatorDashboardHome";
 import CreatorOpportunities from "./pages/Creator/CreatorOpportunities";
@@ -30,6 +30,11 @@ import Messages from "./pages/Brand/Messages";
 import Meetings from "./pages/Brand/Meetings";
 import Payments from "./pages/Brand/Payments";
 
+import ExploreLayout from "./pages/Explore/ExploreLayout";
+import ExploreCreatorsView from "./pages/Explore/views/ExploreCreatorsView";
+import ExploreBrandsView from "./pages/Explore/views/ExploreBrandsView";
+import ExploreCampaignsView from "./pages/Explore/views/ExploreCampaignsView";
+
 export default function App() {
   return (
     <LoginModalProvider>
@@ -37,14 +42,51 @@ export default function App() {
         <LoginChooserModal />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/explore" element={<><Navbar /><ExplorePage /><Footer /></>} />
-          <Route path="/creator/:id" element={<><Navbar /><PublicCreatorProfile /><Footer /></>} />
+
+          <Route path="/explore" element={<Navigate to="/explore/creators" replace />} />
+          <Route path="/explore/*" element={<ExploreLayout />}>
+            <Route path="creators" element={<ExploreCreatorsView />} />
+            <Route path="brands" element={<ExploreBrandsView />} />
+            <Route path="campaigns" element={<ExploreCampaignsView />} />
+          </Route>
+
+          <Route
+            path="/creator/:id"
+            element={
+              <>
+                <Navbar />
+                <PublicCreatorProfile />
+                <Footer />
+              </>
+            }
+          />
+
           <Route path="/creator-login" element={<CreatorLogin />} />
           <Route path="/brand-login" element={<BrandLogin />} />
           <Route path="/creator-sign-up" element={<CreatorSignup />} />
           <Route path="/brand-sign-up" element={<BrandSignup />} />
-          <Route path="/creator-profile" element={<><Navbar /><CreatorProfile /><Footer /></>} />
-          <Route path="/brand-profile" element={<><Navbar /><BrandProfile /><Footer /></>} />
+
+          <Route
+            path="/creator-profile"
+            element={
+              <>
+                <Navbar />
+                <CreatorProfile />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/brand-profile"
+            element={
+              <>
+                <Navbar />
+                <BrandProfile />
+                <Footer />
+              </>
+            }
+          />
+
           <Route path="/creator-dashboard" element={<CreatorDashboardLayout />}>
             <Route index element={<CreatorDashboardHome />} />
             <Route path="opportunities" element={<CreatorOpportunities />} />
@@ -52,6 +94,7 @@ export default function App() {
             <Route path="meetings" element={<CreatorMeetings />} />
             <Route path="earnings" element={<CreatorEarnings />} />
           </Route>
+
           <Route path="/brand-dashboard" element={<BrandDashboardLayout />}>
             <Route index element={<BrandDashboardHome />} />
             <Route path="campaigns" element={<Campaigns />} />
@@ -59,6 +102,7 @@ export default function App() {
             <Route path="meetings" element={<Meetings />} />
             <Route path="payments" element={<Payments />} />
           </Route>
+
           <Route path="/creator-signup" element={<Navigate to="/creator-sign-up" replace />} />
           <Route path="/brand-signup" element={<Navigate to="/brand-sign-up" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />

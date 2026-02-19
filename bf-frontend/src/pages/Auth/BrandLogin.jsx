@@ -11,13 +11,9 @@ import {
 
 const BRAND_STORAGE_KEY = "brandfluencer_brand_user";
 
-/**
- * Demo login logic (frontend-only):
- * - Checks localStorage for brand user saved during signup.
- * - Matches workEmail + password (your signup uses 6-digit password).
- *
- * For real apps: replace with API authentication.
- */
+localStorage.setItem("userRole", "brand");
+// localStorage.setItem("userName", payload.companyName || "Brand");
+
 export default function BrandLogin() {
   const navigate = useNavigate();
 

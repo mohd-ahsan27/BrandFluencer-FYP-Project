@@ -12,14 +12,9 @@ import {
 const CREATOR_PROFILE_KEY = "creator_profile";
 const CREATOR_IMAGE_KEY = "creator_profile_image";
 
-/**
- * Demo Creator login (frontend-only):
- * - Reads creator_profile from localStorage
- * - Matches email + password (expects your signup stored "password")
- *
- * If your Creator signup does NOT store a password yet,
- * see note below: you can either add it in signup or change login check.
- */
+localStorage.setItem("userRole", "creator");
+// localStorage.setItem("userName", payload.fullName || "Creator");
+
 export default function CreatorLogin() {
   const navigate = useNavigate();
 

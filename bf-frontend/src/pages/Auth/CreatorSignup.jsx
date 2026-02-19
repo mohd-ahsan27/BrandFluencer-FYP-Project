@@ -19,6 +19,9 @@ const CATEGORIES = [
 const MAX_CATEGORIES = 5;
 const DRAFT_KEY = "brandfluencer_creator_draft_v6";
 
+localStorage.setItem("userRole", "creator");
+// localStorage.setItem("userName", payload.fullName || "Creator");
+
 function makeId() {
   if (crypto && crypto.randomUUID) return crypto.randomUUID();
   return `c_${Date.now()}_${Math.random().toString(16).slice(2)}`;
