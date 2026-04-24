@@ -12,7 +12,6 @@ import {
 const BRAND_STORAGE_KEY = "brandfluencer_brand_user";
 
 localStorage.setItem("userRole", "brand");
-// localStorage.setItem("userName", payload.companyName || "Brand");
 
 export default function BrandLogin() {
   const navigate = useNavigate();
@@ -44,7 +43,7 @@ export default function BrandLogin() {
     }
 
     const savedEmail = String(saved?.workEmail || "").trim().toLowerCase();
-    const savedPass = String(saved?.password || "").trim(); // your signup is 6 digits
+    const savedPass = String(saved?.password || "").trim();
     const enteredEmail = String(form.email || "").trim().toLowerCase();
     const enteredPass = String(form.password || "").trim();
 
@@ -58,17 +57,20 @@ export default function BrandLogin() {
       return;
     }
 
-    // Set a simple "session" flag (frontend-only)
-    localStorage.setItem("brand_auth", JSON.stringify({ loggedIn: true, at: Date.now() }));
+    localStorage.setItem(
+      "brand_auth",
+      JSON.stringify({ loggedIn: true, at: Date.now() })
+    );
 
-    // After successful login, go to dashboard (or brand profile)
+    localStorage.setItem("userRole", "brand");
+    // localStorage.setItem("userName", saved.companyName || saved.fullName || "Brand");
+
     navigate("/brand-dashboard");
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-50 flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left marketing panel */}
         <div className="hidden lg:block rounded-3xl bg-gradient-to-br from-[#5b2333] via-[#7a2d43] to-[#ff6a00] p-10 text-white shadow-[0_20px_60px_-40px_rgba(0,0,0,0.6)]">
           <h1 className="text-4xl font-extrabold leading-tight">
             Welcome back, Brand.
@@ -89,13 +91,10 @@ export default function BrandLogin() {
           </div>
         </div>
 
-        {/* Right form card */}
         <div className="rounded-3xl bg-white border border-gray-200 shadow-sm p-6 sm:p-8">
           <div className="mb-6">
             <h2 className="text-2xl font-extrabold text-gray-900">Brand Login</h2>
-            <p className="mt-1 text-gray-600">
-              Enter your credentials to continue.
-            </p>
+            <p className="mt-1 text-gray-600">Enter your credentials to continue.</p>
           </div>
 
           {error ? (
@@ -122,9 +121,7 @@ export default function BrandLogin() {
                 <input
                   type={showPass ? "text" : "password"}
                   value={form.password}
-                  onChange={(e) =>
-                    setForm((p) => ({ ...p, password: e.target.value }))
-                  }
+                  onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                   placeholder="6-digit password"
                   className="flex-1 bg-transparent outline-none text-sm text-gray-900"
                   autoComplete="current-password"
@@ -139,21 +136,6 @@ export default function BrandLogin() {
                 </button>
               </div>
             </Field>
-
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm text-gray-600 select-none">
-                <input type="checkbox" className="rounded border-gray-300" />
-                Remember me
-              </label>
-
-              <button
-                type="button"
-                className="text-sm font-semibold text-[#ff6a00] hover:underline"
-                onClick={() => setError("Forgot password requires backend/email flow.")}
-              >
-                Forgot password?
-              </button>
-            </div>
 
             <button
               type="submit"
@@ -171,21 +153,11 @@ export default function BrandLogin() {
 
             <p className="text-sm text-gray-600 text-center">
               Don’t have a brand account?{" "}
-              <Link
-                to="/brand-sign-up"
-                className="font-semibold text-indigo-700 hover:underline"
-              >
+              <Link to="/brand-sign-up" className="font-semibold text-indigo-700 hover:underline">
                 Create one
               </Link>
             </p>
           </form>
-
-          {/* <div className="mt-6 border-t border-gray-100 pt-5">
-            <p className="text-xs text-gray-500">
-              This login is frontend-only (localStorage). For production, replace
-              with a backend auth system.
-            </p>
-          </div> */}
         </div>
       </div>
     </div>

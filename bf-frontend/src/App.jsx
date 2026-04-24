@@ -30,6 +30,8 @@ import Messages from "./pages/Brand/Messages";
 import Meetings from "./pages/Brand/Meetings";
 import Payments from "./pages/Brand/Payments";
 
+import PublicBrandProfile from "./pages/Brand/PublicBrandProfile";
+
 import ExploreLayout from "./pages/Explore/ExploreLayout";
 import ExploreCreatorsView from "./pages/Explore/views/ExploreCreatorsView";
 import ExploreBrandsView from "./pages/Explore/views/ExploreBrandsView";
@@ -61,6 +63,17 @@ export default function App() {
             }
           />
 
+          <Route
+            path="/brand/:id"
+            element={
+              <>
+                <Navbar />
+                <PublicBrandProfile />
+                <Footer />
+              </>
+            }
+          />
+
           <Route path="/creator-login" element={<CreatorLogin />} />
           <Route path="/brand-login" element={<BrandLogin />} />
           <Route path="/creator-sign-up" element={<CreatorSignup />} />
@@ -76,6 +89,7 @@ export default function App() {
               </>
             }
           />
+
           <Route
             path="/brand-profile"
             element={

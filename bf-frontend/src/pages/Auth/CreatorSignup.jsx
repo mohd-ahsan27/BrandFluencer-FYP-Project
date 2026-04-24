@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { addCreator } from "../../data/creatorsStore";
 import {
@@ -6,7 +5,6 @@ import {
   FaYoutube,
   FaFacebook,
   FaTiktok,
-  FaSnapchatGhost,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -20,50 +18,11 @@ const MAX_CATEGORIES = 5;
 const DRAFT_KEY = "brandfluencer_creator_draft_v6";
 
 localStorage.setItem("userRole", "creator");
-// localStorage.setItem("userName", payload.fullName || "Creator");
 
 function makeId() {
   if (crypto && crypto.randomUUID) return crypto.randomUUID();
   return `c_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
-
-const finalizeSubmit = () => {
-  const id = makeId();
-
-  const newCreator = {
-    id,
-    name: form.fullName,
-    email: form.email,
-    aboutMe: form.aboutMe || "",
-    categories: form.categories || [],
-    socials: form.socials || {
-      instagram: { handle: "" },
-      youtube: { handle: "" },
-      tiktok: { handle: "" },
-      facebook: { handle: "" },
-      snapchat: { handle: "" },
-    },
-    platforms: {
-      instagram: !!form.socials?.instagram?.handle,
-      youtube: !!form.socials?.youtube?.handle,
-      tiktok: !!form.socials?.tiktok?.handle,
-      facebook: !!form.socials?.facebook?.handle,
-      snapchat: !!form.socials?.snapchat?.handle,
-    },
-    followers: 50000,
-    engagementRate: 4.2,
-    rating: 4.6,
-    reviewsCount: 12,
-    verified: false,
-    trending: false,
-    profileImageDataUrl: form.profileImageDataUrl || "",
-  };
-
-  addCreator(newCreator);
-  localStorage.setItem("creator_profile", JSON.stringify(newCreator));
-  localStorage.setItem("userRole", "creator");
-  navigate("/creator-profile");
-};
 
 export default function CreatorSignUp() {
   const navigate = useNavigate();
@@ -78,7 +37,6 @@ export default function CreatorSignUp() {
       youtube: { handle: "" },
       tiktok: { handle: "" },
       facebook: { handle: "" },
-      // snapchat: { handle: "" }, // ✅ Added Snapchat to sign-up
     },
     categories: [],
   });
@@ -124,9 +82,11 @@ export default function CreatorSignUp() {
       setStep(ns);
     }
   };
+
   const back = () => setStep((s) => Math.max(0, s - 1));
 
   const handleChange = (key, val) => setForm((f) => ({ ...f, [key]: val }));
+
   const updateSocial = (k, val) =>
     setForm((f) => ({
       ...f,
@@ -136,11 +96,11 @@ export default function CreatorSignUp() {
   const toggleCat = (cat) =>
     setForm((f) => {
       const has = f.categories.includes(cat);
-      let next;
-      if (has) next = f.categories.filter((c) => c !== cat);
-      else next = [...f.categories, cat];
-      if (next.length > MAX_CATEGORIES) return f;
-      return { ...f, categories: next };
+      let nextCats;
+      if (has) nextCats = f.categories.filter((c) => c !== cat);
+      else nextCats = [...f.categories, cat];
+      if (nextCats.length > MAX_CATEGORIES) return f;
+      return { ...f, categories: nextCats };
     });
 
   const submit = () => {
@@ -149,14 +109,46 @@ export default function CreatorSignUp() {
       setStep(2);
       return;
     }
-    try {
-      localStorage.setItem("creator_profile", JSON.stringify(form));
-      localStorage.removeItem(DRAFT_KEY);
-    } catch {
-      try {
-        sessionStorage.setItem("creator_profile", JSON.stringify(form));
-      } catch {}
-    }
+
+    const id = makeId();
+    const newCreator = {
+      id,
+      name: form.fullName,
+      fullName: form.fullName,
+      email: form.email,
+      password: form.password,
+      aboutMe: form.aboutMe || "",
+      categories: form.categories || [],
+      socials: form.socials || {},
+      platforms: {
+        instagram: !!form.socials?.instagram?.handle,
+        youtube: !!form.socials?.youtube?.handle,
+        tiktok: !!form.socials?.tiktok?.handle,
+        facebook: !!form.socials?.facebook?.handle,
+        snapchat: false,
+      },
+      followers: 50000,
+      engagementRate: 4.2,
+      rating: 4.6,
+      reviewsCount: 12,
+      verified: false,
+      trending: false,
+      profileImageDataUrl: form.profileImageDataUrl || "",
+    };
+
+    addCreator(newCreator);
+
+    localStorage.setItem("creator_profile", JSON.stringify(newCreator));
+    localStorage.removeItem(DRAFT_KEY);
+
+    localStorage.setItem(
+      "creator_auth",
+      JSON.stringify({ loggedIn: true, at: Date.now() })
+    );
+
+    localStorage.setItem("userRole", "creator");
+    // localStorage.setItem("userName", newCreator.fullName || "Creator");
+
     navigate("/creator-dashboard");
   };
 
@@ -167,7 +159,6 @@ export default function CreatorSignUp() {
   return (
     <div className="min-h-screen flex items-center justify-center px-3 py-10 bg-gradient-to-br from-[#eef2ff] via-[#e0f7ff] to-[#ffe8ef]">
       <div className="w-full max-w-4xl bg-white/95 backdrop-blur-xl border border-slate-100 rounded-3xl shadow-2xl p-6 sm:p-10">
-        {/* Stepper */}
         <div className="flex flex-wrap justify-between mb-8 gap-2">
           {["Personal", "Socials", "Categories"].map((lbl, i) => {
             const active = i === step;
@@ -188,9 +179,7 @@ export default function CreatorSignUp() {
           })}
         </div>
 
-        {/* Content */}
         <div className="bg-white rounded-2xl shadow-inner p-5 sm:p-8">
-          {/* Step 0: Personal */}
           {step === 0 && (
             <>
               <StepTitle text="Personal Information" />
@@ -226,7 +215,6 @@ export default function CreatorSignUp() {
             </>
           )}
 
-          {/* Step 1: Socials */}
           {step === 1 && (
             <>
               <StepTitle text="Social Media Handles (Optional)" />
@@ -236,7 +224,6 @@ export default function CreatorSignUp() {
                   { k: "youtube", label: "YouTube", Icon: FaYoutube, color: "text-red-600" },
                   { k: "tiktok", label: "TikTok", Icon: FaTiktok, color: "text-black" },
                   { k: "facebook", label: "Facebook", Icon: FaFacebook, color: "text-blue-600" },
-                  // { k: "snapchat", label: "Snapchat", Icon: FaSnapchatGhost, color: "text-yellow-500" }, // ✅ Snapchat
                 ].map(({ k, label, Icon, color }) => (
                   <div key={k} className="bg-sky-50 rounded-lg border border-sky-100 p-4">
                     <div className="flex items-center gap-2 mb-3">
@@ -255,7 +242,6 @@ export default function CreatorSignUp() {
             </>
           )}
 
-          {/* Step 2: Categories (slightly larger box) */}
           {step === 2 && (
             <>
               <StepTitle text="Categories (1 to 5)" />
@@ -289,14 +275,11 @@ export default function CreatorSignUp() {
                   })}
                 </div>
               </div>
-              {errors.categories && (
-                <p className="text-red-500 text-sm mt-2">{errors.categories}</p>
-              )}
+              {errors.categories && <p className="text-red-500 text-sm mt-2">{errors.categories}</p>}
             </>
           )}
         </div>
 
-        {/* Footer buttons */}
         <div className="mt-6 flex flex-col sm:flex-row justify-between gap-3">
           {step > 0 && (
             <button

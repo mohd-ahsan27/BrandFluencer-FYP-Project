@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,7 +13,6 @@ import {
   FaInfoCircle,
   FaBullseye,
 } from "react-icons/fa";
-
 
 const INDUSTRIES = [
   "Fashion",
@@ -68,13 +66,12 @@ export default function BrandSignUp() {
     },
   });
 
-  localStorage.setItem("userRole", "brand");
-// localStorage.setItem("userName", payload.companyName || "Brand");
-
   const selectedCount = form.categories.length;
 
+  localStorage.setItem("userRole", "brand");
+
   const websiteLooksValid = (value) => {
-    if (!value.trim()) return true; 
+    if (!value.trim()) return true;
     return /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/.test(
       value.trim()
     );
@@ -85,7 +82,6 @@ export default function BrandSignUp() {
     return vals.some((v) => String(v || "").trim().length > 0);
   };
 
-  
   const validate = () => {
     const e = {};
 
@@ -104,23 +100,18 @@ export default function BrandSignUp() {
     }
 
     if (step === 1) {
-     
       if (!form.companyName.trim()) e.companyName = "Company name required";
 
-     
       if (!websiteLooksValid(form.companyWebsite))
         e.companyWebsite = "Enter a valid website (e.g., example.com)";
 
-      
       if (form.categories.length === 0)
         e.categories = "Select at least one industry";
       if (form.categories.length > 5)
         e.categories = "You can select a maximum of 5 industries";
-   
     }
 
     if (step === 2) {
-    
       if (!hasAtLeastOneSocial())
         e.socials = "Please add at least 1 social media handle.";
     }
@@ -129,7 +120,6 @@ export default function BrandSignUp() {
     return Object.keys(e).length === 0;
   };
 
-  /* ---------------- HANDLERS ---------------- */
   const handleNext = () => {
     const isValid = validate();
     if (!isValid) {
@@ -169,6 +159,15 @@ export default function BrandSignUp() {
     }
 
     localStorage.setItem("brandfluencer_brand_user", JSON.stringify(form));
+
+    localStorage.setItem(
+      "brand_auth",
+      JSON.stringify({ loggedIn: true, at: Date.now() })
+    );
+
+    localStorage.setItem("userRole", "brand");
+    // localStorage.setItem("userName", form.companyName || form.fullName || "Brand");
+
     navigate("/brand-dashboard");
   };
 
@@ -178,7 +177,6 @@ export default function BrandSignUp() {
     return "Add at least 1 social media handle to continue.";
   }, [step]);
 
-  /* ---------------- UI ---------------- */
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-purple-100 flex items-center justify-center px-4 py-10">
       <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-indigo-200/40 blur-3xl" />
@@ -188,7 +186,6 @@ export default function BrandSignUp() {
         onSubmit={handleSubmit}
         className="w-full max-w-3xl rounded-3xl bg-white/80 backdrop-blur border border-white shadow-[0_20px_60px_-30px_rgba(79,70,229,0.45)] p-6 md:p-8"
       >
-        {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900">
             Brand Sign Up
@@ -198,12 +195,9 @@ export default function BrandSignUp() {
           </p>
         </div>
 
-        {/* Stepper */}
         <Stepper step={step} />
 
-        {/* Content Shell */}
         <div className="mt-6 rounded-2xl border border-gray-100 bg-white p-5 md:p-6 shadow-sm">
-          {/* STEP 0 */}
           {step === 0 && (
             <div>
               <StepTitle
@@ -255,7 +249,6 @@ export default function BrandSignUp() {
             </div>
           )}
 
-          {/* STEP 1 */}
           {step === 1 && (
             <div>
               <StepTitle
@@ -369,7 +362,6 @@ export default function BrandSignUp() {
             </div>
           )}
 
-          {/* STEP 2 */}
           {step === 2 && (
             <div>
               <StepTitle
@@ -391,7 +383,6 @@ export default function BrandSignUp() {
                   title="Instagram"
                   hint="Handle or profile link"
                   accentClass="bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600"
-                  ringClass="focus-within:ring-pink-200 focus-within:border-pink-300"
                 >
                   <Input
                     label="Instagram"
@@ -404,7 +395,6 @@ export default function BrandSignUp() {
                       })
                     }
                     size="sm"
-                    ringClass="focus-within:ring-pink-200 focus-within:border-pink-300"
                   />
                 </SocialCard>
 
@@ -413,7 +403,6 @@ export default function BrandSignUp() {
                   title="Facebook"
                   hint="Page name or link"
                   accentClass="bg-[#1877F2]"
-                  ringClass="focus-within:ring-blue-200 focus-within:border-blue-300"
                 >
                   <Input
                     label="Facebook"
@@ -426,7 +415,6 @@ export default function BrandSignUp() {
                       })
                     }
                     size="sm"
-                    ringClass="focus-within:ring-blue-200 focus-within:border-blue-300"
                   />
                 </SocialCard>
 
@@ -435,7 +423,6 @@ export default function BrandSignUp() {
                   title="YouTube"
                   hint="Channel name or link"
                   accentClass="bg-[#FF0000]"
-                  ringClass="focus-within:ring-red-200 focus-within:border-red-300"
                 >
                   <Input
                     label="YouTube"
@@ -448,7 +435,6 @@ export default function BrandSignUp() {
                       })
                     }
                     size="sm"
-                    ringClass="focus-within:ring-red-200 focus-within:border-red-300"
                   />
                 </SocialCard>
 
@@ -457,7 +443,6 @@ export default function BrandSignUp() {
                   title="TikTok"
                   hint="Handle or link"
                   accentClass="bg-black"
-                  ringClass="focus-within:ring-gray-300 focus-within:border-gray-400"
                 >
                   <Input
                     label="TikTok"
@@ -470,24 +455,13 @@ export default function BrandSignUp() {
                       })
                     }
                     size="sm"
-                    ringClass="focus-within:ring-gray-300 focus-within:border-gray-400"
                   />
                 </SocialCard>
-              </div>
-
-              <div className="mt-5 rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3">
-                <p className="text-sm text-indigo-900 font-semibold">
-                  Tip
-                  <span className="ml-2 font-normal text-indigo-800/90">
-                    Add the handle or link (at least one is required).
-                  </span>
-                </p>
               </div>
             </div>
           )}
         </div>
 
-        {/* NAVIGATION */}
         <div className="mt-6 flex items-center justify-between">
           {step > 0 ? (
             <button
@@ -522,8 +496,6 @@ export default function BrandSignUp() {
     </div>
   );
 }
-
-/* ---------------- UI COMPONENTS ---------------- */
 
 function Stepper({ step }) {
   return (
@@ -585,26 +557,13 @@ function StepTitle({ title, subtitle }) {
       <h2 className="text-xl md:text-2xl font-extrabold text-gray-900">
         {title}
       </h2>
-      {subtitle ? (
-        <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
-      ) : null}
+      {subtitle ? <p className="text-sm text-gray-600 mt-1">{subtitle}</p> : null}
     </div>
   );
 }
 
-function Input({
-  label,
-  error,
-  leftIcon,
-  size = "md",
-  className = "",
-  ringClass = "",
-  ...props
-}) {
-  const sizing =
-    size === "sm"
-      ? "h-10 px-3 text-sm"
-      : "h-11 px-4 text-sm md:text-base";
+function Input({ label, error, leftIcon, size = "md", className = "", ringClass = "", ...props }) {
+  const sizing = size === "sm" ? "h-10 px-3 text-sm" : "h-11 px-4 text-sm md:text-base";
 
   return (
     <div className={className}>
@@ -618,20 +577,13 @@ function Input({
             : error
             ? "border-red-300 focus-within:ring-red-200"
             : "border-gray-200 focus-within:ring-indigo-200 focus-within:border-indigo-300",
-          error ? "border-red-300" : "",
         ].join(" ")}
       >
-        {leftIcon ? (
-          <span className="pl-3 text-gray-400 text-sm">{leftIcon}</span>
-        ) : null}
+        {leftIcon ? <span className="pl-3 text-gray-400 text-sm">{leftIcon}</span> : null}
 
         <input
           {...props}
-          className={[
-            "w-full outline-none bg-transparent",
-            sizing,
-            leftIcon ? "pr-3" : "",
-          ].join(" ")}
+          className={["w-full outline-none bg-transparent", sizing, leftIcon ? "pr-3" : ""].join(" ")}
         />
       </div>
 
@@ -640,14 +592,7 @@ function Input({
   );
 }
 
-function Textarea({
-  label,
-  error,
-  leftIcon,
-  rows = 4,
-  className = "",
-  ...props
-}) {
+function Textarea({ label, error, leftIcon, rows = 4, className = "", ...props }) {
   return (
     <div className={className}>
       <label className="text-sm font-semibold text-gray-800">{label}</label>
@@ -661,17 +606,12 @@ function Textarea({
         ].join(" ")}
       >
         <div className="flex items-start gap-2">
-          {leftIcon ? (
-            <span className="pl-3 pt-3 text-gray-400 text-sm">{leftIcon}</span>
-          ) : null}
+          {leftIcon ? <span className="pl-3 pt-3 text-gray-400 text-sm">{leftIcon}</span> : null}
 
           <textarea
             rows={rows}
             {...props}
-            className={[
-              "w-full outline-none bg-transparent px-3 py-2.5 text-sm resize-none",
-              leftIcon ? "pr-3" : "px-4",
-            ].join(" ")}
+            className={["w-full outline-none bg-transparent px-3 py-2.5 text-sm resize-none", leftIcon ? "pr-3" : "px-4"].join(" ")}
           />
         </div>
       </div>
@@ -681,23 +621,12 @@ function Textarea({
   );
 }
 
-function SocialCard({
-  icon,
-  title,
-  hint,
-  children,
-  accentClass = "bg-indigo-600",
-}) {
+function SocialCard({ icon, title, hint, children, accentClass = "bg-indigo-600" }) {
   return (
     <div className="rounded-2xl border border-gray-100 bg-gradient-to-b from-white to-gray-50 p-4 shadow-sm">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div
-            className={[
-              "w-10 h-10 rounded-xl text-white flex items-center justify-center shadow-sm",
-              accentClass,
-            ].join(" ")}
-          >
+          <div className={["w-10 h-10 rounded-xl text-white flex items-center justify-center shadow-sm", accentClass].join(" ")}>
             <span className="text-lg">{icon}</span>
           </div>
           <div>
