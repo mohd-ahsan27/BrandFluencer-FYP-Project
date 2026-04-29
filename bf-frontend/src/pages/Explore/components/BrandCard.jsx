@@ -6,38 +6,69 @@ import { addReport } from "../../../data/reportStore";
 function normalizeUrl(url) {
   const v = String(url || "").trim();
   if (!v) return "";
-  return /^https?:\/\//i.test(v) ? v : `https://${v}`;
+  if (/^https?:\/\//i.test(v)) return v;
+  return `https://${v}`;
+}
+
+function getReporterInfo() {
+  const role = localStorage.getItem("userRole") || "guest";
+  const name = localStorage.getItem("userName") || "";
+  return { role, name };
 }
 
 export default function BrandCard({ brand }) {
   const navigate = useNavigate();
 
+  const brandName = brand.name || "Brand";
+
+  const renderWebsite = () => {
+    if (!brand.website) return null;
+
+    return (
+      <a
+        href={normalizeUrl(brand.website)}
+        target="_blank"
+        rel="noreferrer"
+        className="mt-2 inline-flex items-center gap-2 text-sm text-sky-700 font-semibold hover:underline"
+      >
+        Website <FiExternalLink className="text-xs" />
+      </a>
+    );
+  };
+
   const onReport = () => {
-    addReport({ type: "brand", id: brand.id, reason: "Reported from Explore" });
-    alert("Report submitted (demo).");
+    const { role, name } = getReporterInfo();
+
+    const reason = window.prompt("Why are you reporting this brand? (optional)") || "";
+    try {
+      addReport({
+        type: "brand",
+        targetId: brand.id,
+        targetName: brandName,
+        reason: reason,
+        reporterRole: role,
+        reporterName: name,
+      });
+      alert("Report submitted (demo).");
+    } catch (e) {
+      alert("Report failed to save. Please try again.");
+    }
   };
 
   return (
     <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-sm hover:shadow-md transition">
       <div className="flex items-start gap-4">
         <div className="h-14 w-14 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
-          <img src={brand.logo} alt={brand.name} className="h-full w-full object-cover" />
+          <img src={brand.logo} alt={brandName} className="h-full w-full object-cover" />
         </div>
 
         <div className="min-w-0 flex-1">
-          <h3 className="font-extrabold text-slate-900 truncate">{brand.name}</h3>
-          <p className="text-sm text-slate-600">{brand.category} • {brand.location}</p>
+          <h3 className="font-extrabold text-slate-900 truncate">{brandName}</h3>
+          <p className="text-sm text-slate-600">
+            {brand.category} • {brand.location}
+          </p>
 
-          {brand.website ? (
-            <a
-              href={normalizeUrl(brand.website)}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 inline-flex items-center gap-2 text-sm text-sky-700 font-semibold hover:underline"
-            >
-              Website <FiExternalLink className="text-xs" />
-            </a>
-          ) : null}
+          {renderWebsite()}
         </div>
 
         <button

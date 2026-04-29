@@ -61,7 +61,7 @@ export default function ExploreCreatorsView() {
     setVerifiedOnly(false);
   };
 
-  if (role !== "brand") return null;
+  if (role === "guest") return null;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[18rem_1fr] gap-6">

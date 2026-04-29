@@ -29,7 +29,7 @@ export function getCreators() {
 export function getCreatorById(id) {
   const list = getCreators();
   for (let i = 0; i < list.length; i += 1) {
-    if (list[i].id === id) return list[i];
+    if (String(list[i].id) === String(id)) return list[i];
   }
   return null;
 }
@@ -53,7 +53,7 @@ export function addCreator(creator) {
 
   let exists = false;
   for (let i = 0; i < creators.length; i += 1) {
-    if (creators[i].id === creator.id) {
+    if (String(creators[i].id) === String(creator.id)) {
       exists = true;
       break;
     }
@@ -62,7 +62,7 @@ export function addCreator(creator) {
   let nextCreators = [];
   if (exists) {
     nextCreators = creators.map((c) => {
-      if (c.id === creator.id) return nextCreator;
+      if (String(c.id) === String(creator.id)) return nextCreator;
       return c;
     });
   } else {
@@ -73,4 +73,17 @@ export function addCreator(creator) {
   localStorage.setItem(CREATOR_IMAGES_KEY, JSON.stringify(images));
 
   return nextCreator;
+}
+
+export function setCreatorVerified(creatorId, verified) {
+  const creators = safeParse(localStorage.getItem(CREATORS_KEY), []);
+  if (!Array.isArray(creators)) return creators;
+
+  const updated = creators.map((c) => {
+    if (String(c.id) !== String(creatorId)) return c;
+    return { ...c, verified: !!verified };
+  });
+
+  localStorage.setItem(CREATORS_KEY, JSON.stringify(updated));
+  return updated;
 }

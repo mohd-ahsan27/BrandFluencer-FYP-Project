@@ -37,6 +37,20 @@ import ExploreCreatorsView from "./pages/Explore/views/ExploreCreatorsView";
 import ExploreBrandsView from "./pages/Explore/views/ExploreBrandsView";
 import ExploreCampaignsView from "./pages/Explore/views/ExploreCampaignsView";
 
+import AdminLogin from "./pages/Admin/AdminLogin";
+import AdminLayout from "./pages/Admin/AdminLayout";
+import AdminDashboardHome from "./pages/Admin/AdminDashboardHome";
+import AdminReports from "./pages/Admin/AdminReports";
+import AdminUsers from "./pages/Admin/AdminUsers";
+import AdminCampaigns from "./pages/Admin/AdminCampaigns";
+import AdminProfile from "./pages/Admin/AdminProfile";
+
+import AdminVerifications from "./pages/Admin/AdminVerifications";
+import AdminPayments from "./pages/Admin/AdminPayments";
+import AdminMeetings from "./pages/Admin/AdminMeetings";
+import AdminAnalytics from "./pages/Admin/AdminAnalytics";
+import AdminSettings from "./pages/Admin/AdminSettings";
+
 export default function App() {
   return (
     <LoginModalProvider>
@@ -117,8 +131,23 @@ export default function App() {
             <Route path="payments" element={<Payments />} />
           </Route>
 
+          <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboardHome />} />
+            <Route path="reports" element={<AdminReports />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="campaigns" element={<AdminCampaigns />} />
+            <Route path="verifications" element={<AdminVerifications />} />
+            <Route path="payments" element={<AdminPayments />} />
+            <Route path="meetings" element={<AdminMeetings />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="settings" element={<AdminSettings />} />
+            <Route path="profile" element={<AdminProfile />} />
+          </Route>
+
           <Route path="/creator-signup" element={<Navigate to="/creator-sign-up" replace />} />
           <Route path="/brand-signup" element={<Navigate to="/brand-sign-up" replace />} />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

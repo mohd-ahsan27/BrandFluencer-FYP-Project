@@ -20,20 +20,42 @@ function formatFollowers(n) {
   return `${v}`;
 }
 
+function getReporterInfo() {
+  const role = localStorage.getItem("userRole") || "guest";
+  const name = localStorage.getItem("userName") || "";
+  return { role, name };
+}
+
 export default function InfluencerCard({ creator }) {
   const navigate = useNavigate();
+
   const cover = creator.profileImageDataUrl || creator.image || "";
+  const creatorName = creator.name || "Creator";
 
   const onReport = () => {
-    addReport({ type: "creator", id: creator.id, reason: "Reported from Explore" });
-    alert("Report submitted (demo).");
+    const { role, name } = getReporterInfo();
+
+    const reason = window.prompt("Why are you reporting this creator? (optional)") || "";
+    try {
+      addReport({
+        type: "creator",
+        targetId: creator.id,
+        targetName: creatorName,
+        reason: reason,
+        reporterRole: role,
+        reporterName: name,
+      });
+      alert("Report submitted (demo).");
+    } catch (e) {
+      alert("Report failed to save. Please try again.");
+    }
   };
 
   return (
     <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition">
       <div className="relative mb-4">
         <div className="aspect-[16/10] rounded-2xl overflow-hidden bg-slate-100">
-          <img alt={creator.name} className="w-full h-full object-cover" src={cover} />
+          <img alt={creatorName} className="w-full h-full object-cover" src={cover} />
         </div>
 
         <button
@@ -49,13 +71,15 @@ export default function InfluencerCard({ creator }) {
 
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="min-w-0">
-          <h3 className="font-extrabold text-base text-slate-900 truncate">{creator.name}</h3>
+          <h3 className="font-extrabold text-base text-slate-900 truncate">{creatorName}</h3>
           <p className="text-xs text-slate-500">{creator.niche || "Creator"}</p>
         </div>
 
         <div className="text-right">
           <Stars value={creator.rating || 0} />
-          <p className="text-[11px] text-slate-500 mt-1">{Number(creator.reviewsCount || 0)} reviews</p>
+          <p className="text-[11px] text-slate-500 mt-1">
+            {Number(creator.reviewsCount || 0)} reviews
+          </p>
         </div>
       </div>
 
