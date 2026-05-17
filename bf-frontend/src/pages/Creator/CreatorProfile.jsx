@@ -302,7 +302,8 @@ export default function CreatorProfilePage() {
   return (
     <div className="min-h-screen bg-slate-50 pb-12">
       {/* Header */}
-      <div className="relative h-48 sm:h-56 bg-gradient-to-r from-sky-500 via-indigo-500 to-fuchsia-500" />
+      {/* <div className="relative h-56 sm:h-64 bg-gradient-to-r from-blue-500 via-indigo-600 to-blue-700 shadow-lg" /> */}
+      <div className="relative h-56 sm:h-64 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-900 shadow-lg" />
       <div className="max-w-6xl mx-auto px-4 -mt-16 sm:-mt-20 relative z-10">
         <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
           {/* Header block */}
